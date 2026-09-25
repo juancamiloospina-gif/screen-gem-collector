@@ -2,6 +2,8 @@
 
 Prototipo funcional (no producción) para **INDEGA S.A.**, flota nacional de la operación de Coca-Cola FEMSA Colombia. Demuestra cómo un centro de operaciones digital brinda visibilidad en tiempo real sobre las asistencias vehiculares: desde el reporte del conductor hasta el cierre del caso, con semáforo de cumplimiento contra el tiempo prometido.
 
+> **Prototipo sin backend** — los datos viven en memoria, para fines de demo comercial (mostrarle al cliente cómo se vería). La persistencia real (Supabase/Postgres) es parte de la fase de implementación, no de este prototipo.
+
 ## Pantallas
 
 | Ruta | Pantalla | Qué muestra |
@@ -16,11 +18,12 @@ Prototipo funcional (no producción) para **INDEGA S.A.**, flota nacional de la 
 ## Qué es real y qué está simulado
 
 **Real:**
-- Los casos y sus eventos se guardan en la base de datos (Lovable Cloud / Supabase): tabla `casos` con la etapa como enum de las 8 etapas, y `eventos_caso` con la línea de tiempo. No están hardcodeados en los componentes.
-- El tablero se refresca automáticamente (cada 15 s) y el semáforo se calcula contra el tiempo prometido de cada caso.
+- La lógica de negocio: etapa como enum de las 8 etapas, línea de tiempo por caso (`eventos_caso`), cálculo de semáforo contra el tiempo prometido. No está hardcodeada en los componentes visuales.
+- El tablero se refresca automáticamente (cada 15 s).
 - El mapa de Colombia es un SVG real generado a partir del GeoJSON del país.
 
 **Simulado (fuera de alcance del prototipo):**
+- **No hay backend ni base de datos real.** Los 12 casos semilla y sus eventos viven en memoria (`src/lib/casos.ts`) y se recalculan contra la hora actual en cada lectura, así que la demo siempre muestra una mezcla realista de verde/amarillo/rojo sin importar cuánto tiempo lleve corriendo — no hace falta resetear nada antes de una demo. Los casos creados desde `/reportar` sí quedan con su reloj corriendo normalmente, pero solo mientras dure la sesión del navegador (no persisten).
 - El agente de recepción del chat usa reglas de texto (detección de placa, servicio y ciudad), **no un LLM real**.
 - No hay integración con WhatsApp Business, telefonía/voz, ni con los sistemas de la aseguradora.
 - No se calculan excedentes ni coberturas reales; no se generan PDFs.
@@ -29,6 +32,7 @@ Prototipo funcional (no producción) para **INDEGA S.A.**, flota nacional de la 
 ## Extensión futura
 
 - `src/lib/agente-recepcion.server.ts` — punto de extensión reservado para conectar el agente de recepción a un LLM real cuando se decida.
+- `supabase/migrations/` — se deja como referencia del esquema (`casos`, `eventos_caso`) y los datos semilla que tendría la fase de implementación con persistencia real (Supabase/Postgres). No se usa en runtime: este prototipo no depende de Supabase ni de ninguna variable de entorno.
 
 ## Desarrollo
 
@@ -41,4 +45,4 @@ npm run dev
 
 - TanStack Start (React 19, TypeScript)
 - Tailwind CSS v4
-- Lovable Cloud (Supabase) para la base de datos
+- Datos en memoria (sin backend) — ver `src/lib/casos.ts`
