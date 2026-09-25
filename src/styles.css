@@ -26,3 +26,14 @@
 @keyframes slaPulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.45;transform:scale(.85)} }
 @utility pulse-sla { animation:slaPulse 1.7s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) { .pulse-sla { animation:none; } }
+
+/* Mapa interactivo (Leaflet) con el tema oscuro del centro de operaciones.
+   Prefijo .leaflet-container para ganarle a leaflet.css, que carga después. */
+.leaflet-container { font-family: var(--font-sans); background: var(--ops-deep); }
+.leaflet-container .leaflet-popup-content-wrapper, .leaflet-container .leaflet-popup-tip { background: var(--ops-navy); color: var(--ops-ink); border: 1px solid var(--ops-line); box-shadow: 0 12px 30px rgb(0 0 0 / .45); }
+.leaflet-container .leaflet-popup-content { margin: 12px 14px; font-size: 12px; line-height: 1.4; }
+.leaflet-container a.leaflet-popup-close-button { color: var(--ops-muted); }
+.leaflet-container .leaflet-tooltip { background: var(--ops-deep); color: var(--ops-ink); border: 1px solid var(--ops-line); font-size: 10px; font-weight: 700; box-shadow: none; }
+.leaflet-container .leaflet-tooltip-top::before { border-top-color: var(--ops-line); }
+.leaflet-container .leaflet-control-attribution { background: color-mix(in oklab, var(--ops-deep) 80%, transparent); color: var(--ops-muted); font-size: 9px; }
+.leaflet-container .leaflet-control-attribution a { color: var(--brand-sky); }
