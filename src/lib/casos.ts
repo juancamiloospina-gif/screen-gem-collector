@@ -299,8 +299,11 @@ const CASOS_SEMILLA: CasoSemilla[] = [
 
 const NUMERO_INICIAL = 1040;
 
+// La placa hace de id estable: esta lista se reconstruye en cada carga de
+// página (y en cada reinicio del servidor), así que un UUID aleatorio
+// rompería cualquier link compartido a un caso semilla.
 const casos: CasoInterno[] = CASOS_SEMILLA.map((s, i) => ({
-  id: crypto.randomUUID(),
+  id: s.placa,
   numero: NUMERO_INICIAL + i,
   placa: s.placa,
   tipo_servicio: s.tipo_servicio,
@@ -376,15 +379,20 @@ export const casosQuery = {
   refetchInterval: 15000,
 };
 
+const CASO_NO_ENCONTRADO = "Caso no encontrado";
+
 export function casoQuery(id: string) {
   return {
     queryKey: ["caso", id],
     queryFn: async (): Promise<{ caso: Caso; eventos: EventoCaso[] }> => {
       const c = casos.find((x) => x.id === id);
-      if (!c) throw new Error("Caso no encontrado");
+      if (!c) throw new Error(CASO_NO_ENCONTRADO);
       const ahora = Date.now();
       return { caso: aCaso(c, ahora), eventos: generarEventos(c, ahora) };
     },
+    // Un id inexistente no se arregla reintentando: sin esto React Query
+    // reintenta 3 veces con backoff (~7 s en "Cargando caso…").
+    retry: (fallos: number, error: Error) => error.message !== CASO_NO_ENCONTRADO && fallos < 3,
   };
 }
 
