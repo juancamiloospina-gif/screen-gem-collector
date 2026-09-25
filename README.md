@@ -28,7 +28,7 @@ Prototipo funcional (no producción) para **INDEGA S.A.**, flota nacional de la 
 
 ## Extensión futura
 
-- `supabase/functions/agente-recepcion/` — punto de extensión reservado para conectar el agente de recepción a un LLM real cuando se decida.
+- `src/lib/agente-recepcion.server.ts` — punto de extensión reservado para conectar el agente de recepción a un LLM real cuando se decida.
 
 ## Desarrollo
 
