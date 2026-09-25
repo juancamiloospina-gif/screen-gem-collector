@@ -4,134 +4,25 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/*
- * Sistema de diseño — Centro de Control de Asistencias (INDEGA)
- * Registro: sala de despacho. Paleta neutra fría; verde/ámbar/rojo
- * reservados EXCLUSIVAMENTE al estado de SLA.
- */
-
 @theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-
-  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
-
-  --color-carbon: var(--carbon);
-  --color-panel: var(--panel);
-  --color-panel2: var(--panel2);
-  --color-line: var(--line);
-  --color-ink: var(--ink);
-  --color-muted-ink: var(--muted-ink);
-  --color-faint: var(--faint);
-  --color-cool: var(--cool);
-  --color-sla-green: var(--sla-green);
-  --color-sla-amber: var(--sla-amber);
-  --color-sla-red: var(--sla-red);
-
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --color-ring-offset-background: var(--background);
+  --radius-sm: calc(var(--radius) - 4px); --radius-md: calc(var(--radius) - 2px); --radius-lg: var(--radius); --radius-xl: calc(var(--radius) + 4px);
+  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif; --font-display: "Sora", ui-sans-serif, sans-serif; --font-data: "DM Mono", ui-monospace, monospace;
+  --color-brand-navy: var(--brand-navy); --color-brand-blue: var(--brand-blue); --color-brand-sky: var(--brand-sky); --color-brand-mist: var(--brand-mist); --color-surface: var(--surface);
+  --color-ops-deep: var(--ops-deep); --color-ops-navy: var(--ops-navy); --color-ops-panel: var(--ops-panel); --color-ops-line: var(--ops-line); --color-ops-ink: var(--ops-ink); --color-ops-muted: var(--ops-muted);
+  --color-carbon: var(--ops-deep); --color-panel: var(--ops-navy); --color-panel2: var(--ops-panel); --color-line: var(--ops-line); --color-ink: var(--ops-ink); --color-muted-ink: var(--ops-muted); --color-faint: var(--faint); --color-cool: var(--brand-sky);
+  --color-sla-green: var(--sla-green); --color-sla-amber: var(--sla-amber); --color-sla-red: var(--sla-red);
+  --color-background: var(--background); --color-foreground: var(--foreground); --color-card: var(--card); --color-card-foreground: var(--card-foreground); --color-popover: var(--popover); --color-popover-foreground: var(--popover-foreground); --color-primary: var(--primary); --color-primary-foreground: var(--primary-foreground); --color-secondary: var(--secondary); --color-secondary-foreground: var(--secondary-foreground); --color-muted: var(--muted); --color-muted-foreground: var(--muted-foreground); --color-accent: var(--accent); --color-accent-foreground: var(--accent-foreground); --color-destructive: var(--destructive); --color-destructive-foreground: var(--destructive-foreground); --color-border: var(--border); --color-input: var(--input); --color-ring: var(--ring); --color-ring-offset-background: var(--background);
+  --shadow-brand: 0 18px 45px -18px color-mix(in oklab, var(--brand-blue) 45%, transparent);
 }
 
 :root {
-  --radius: 0.5rem;
-
-  --carbon: oklch(0.163 0.016 264);
-  --panel: oklch(0.213 0.017 262);
-  --panel2: oklch(0.255 0.019 262);
-  --line: oklch(0.322 0.023 262);
-  --ink: oklch(0.936 0.007 255);
-  --muted-ink: oklch(0.672 0.02 256);
-  --faint: oklch(0.503 0.023 258);
-  --cool: oklch(0.632 0.043 254);
-  --sla-green: oklch(0.783 0.148 163);
-  --sla-amber: oklch(0.775 0.145 73);
-  --sla-red: oklch(0.664 0.184 25);
-
-  --background: var(--carbon);
-  --foreground: var(--ink);
-  --card: var(--panel);
-  --card-foreground: var(--ink);
-  --popover: var(--panel);
-  --popover-foreground: var(--ink);
-  --primary: var(--cool);
-  --primary-foreground: var(--carbon);
-  --secondary: var(--panel2);
-  --secondary-foreground: var(--ink);
-  --muted: var(--panel2);
-  --muted-foreground: var(--muted-ink);
-  --accent: var(--panel2);
-  --accent-foreground: var(--ink);
-  --destructive: var(--sla-red);
-  --destructive-foreground: var(--carbon);
-  --border: var(--line);
-  --input: var(--line);
-  --ring: var(--cool);
+  --radius: .625rem;
+  --brand-navy: oklch(0.245 0.113 267); --brand-blue: oklch(0.415 0.166 261); --brand-sky: oklch(0.692 0.105 235); --brand-mist: oklch(0.975 0.012 228); --surface: oklch(1 0 0);
+  --ops-deep: oklch(0.145 0.047 265); --ops-navy: oklch(0.19 0.055 265); --ops-panel: oklch(0.235 0.058 263); --ops-line: oklch(0.315 0.055 260); --ops-ink: oklch(0.96 0.012 235); --ops-muted: oklch(0.69 0.034 245); --faint: oklch(0.52 0.035 250);
+  --sla-green: oklch(0.72 0.15 158); --sla-amber: oklch(0.78 0.15 75); --sla-red: oklch(0.64 0.21 25);
+  --background: var(--brand-mist); --foreground: var(--brand-navy); --card: var(--surface); --card-foreground: var(--brand-navy); --popover: var(--surface); --popover-foreground: var(--brand-navy); --primary: var(--brand-blue); --primary-foreground: var(--surface); --secondary: oklch(0.94 0.025 238); --secondary-foreground: var(--brand-navy); --muted: oklch(0.94 0.018 240); --muted-foreground: oklch(0.51 0.045 255); --accent: oklch(0.91 0.04 235); --accent-foreground: var(--brand-navy); --destructive: var(--sla-red); --destructive-foreground: var(--surface); --border: oklch(0.87 0.025 240); --input: oklch(0.84 0.035 240); --ring: var(--brand-sky);
 }
-
-@layer base {
-  * {
-    border-color: var(--color-border);
-  }
-
-  body {
-    background-color: var(--color-background);
-    color: var(--color-foreground);
-    font-family: var(--font-sans);
-    -webkit-font-smoothing: antialiased;
-  }
-}
-
-@keyframes slaPulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.35;
-  }
-}
-
-@keyframes sweepr {
-  to {
-    transform: translateX(340%);
-  }
-}
-
-@keyframes sweepc {
-  to {
-    transform: translateY(130%);
-  }
-}
-
-@utility pulse-sla {
-  animation: slaPulse 1.5s ease-in-out infinite;
-}
-
-@utility sweep-x {
-  animation: sweepr 6s linear infinite;
-}
-
-@utility sweep-y {
-  animation: sweepc 7s linear infinite;
-}
+@layer base { * { border-color: var(--color-border); } body { margin:0; background:var(--color-background); color:var(--color-foreground); font-family:var(--font-sans); -webkit-font-smoothing:antialiased; } button,a { -webkit-tap-highlight-color:transparent; } }
+@keyframes slaPulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.45;transform:scale(.85)} }
+@utility pulse-sla { animation:slaPulse 1.7s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .pulse-sla { animation:none; } }

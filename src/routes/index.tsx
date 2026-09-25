@@ -1,246 +1,69 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { MapaColombia } from "@/components/MapaColombia";
-import { useAhora } from "@/hooks/use-ahora";
-import {
-  casosQuery,
-  COLOR_SEMAFORO,
-  ETIQUETA_SEMAFORO,
-  esAbierto,
-  minutosTranscurridos,
-  semaforo,
-  type Caso,
-} from "@/lib/casos";
+import { ArrowRight, Bot, CheckCircle2, MapPinned, Radio, ShieldCheck } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Tablero de casos · INDEGA Control de Asistencias" },
-      {
-        name: "description",
-        content:
-          "Casos de asistencia vehicular abiertos de la flota INDEGA con etapa actual, tiempo transcurrido y semáforo de cumplimiento.",
-      },
-      { property: "og:title", content: "Tablero de casos · INDEGA Control de Asistencias" },
-      {
-        property: "og:description",
-        content: "Lista y mapa de casos abiertos con semáforo de cumplimiento en vivo.",
-      },
+      { title: "AssisPrex · Centro de Operaciones Digital" },
+      { name: "description", content: "Acceso al centro de gestión y control de asistencias vehiculares de INDEGA." },
+      { property: "og:title", content: "AssisPrex · Centro de Operaciones Digital" },
+      { property: "og:description", content: "Visibilidad en vivo para las asistencias vehiculares de INDEGA." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: Tablero,
+  component: Inicio,
 });
 
-function Kpi({
-  etiqueta,
-  valor,
-  sufijo,
-  nota,
-  tono,
-}: {
-  etiqueta: string;
-  valor: string;
-  sufijo?: string;
-  nota: string;
-  tono?: string;
-}) {
+const PASOS = [
+  { icon: Bot, titulo: "Reporte inmediato", texto: "El conductor informa la novedad al agente de IA." },
+  { icon: Radio, titulo: "Seguimiento en vivo", texto: "La asistencia se controla etapa por etapa." },
+  { icon: ShieldCheck, titulo: "Alerta automática", texto: "El Director de Flota actúa antes del incumplimiento." },
+];
+
+function Marca() {
   return (
-    <div className="flex flex-1 flex-col gap-1 px-5 py-3">
-      <div className="text-[10px] uppercase tracking-[0.16em] text-muted-ink">{etiqueta}</div>
-      <div className="flex items-baseline gap-2">
-        <span className={`font-mono text-2xl tabular-nums tracking-tight ${tono ?? ""}`}>
-          {valor}
-          {sufijo ? <span className="text-sm text-muted-ink"> {sufijo}</span> : null}
-        </span>
-        <span className="font-mono text-[11px] text-faint">{nota}</span>
+    <div className="flex items-center gap-3">
+      <div className="grid grid-cols-3 gap-0.5" aria-hidden="true">
+        {["bg-brand-sky", "bg-brand-blue", "bg-transparent", "bg-transparent", "bg-brand-blue", "bg-brand-navy", "bg-transparent", "bg-brand-navy", "bg-transparent"].map((c, i) => <span key={i} className={`size-2.5 ${c}`} />)}
       </div>
+      <div><div className="font-display text-xl font-semibold text-brand-navy">AssisPrex</div><div className="text-[10px] font-bold uppercase tracking-[0.18em] text-brand-blue">Corremos con propósito</div></div>
     </div>
   );
 }
 
-function Fila({ caso, ahora }: { caso: Caso; ahora: number }) {
-  const s = semaforo(caso, ahora);
-  const min = minutosTranscurridos(caso, ahora);
-  const pct = Math.min(100, Math.round((min / caso.prometido_min) * 100));
+function Inicio() {
   return (
-    <Link
-      to="/caso/$casoId"
-      params={{ casoId: caso.id }}
-      className="grid grid-cols-[1.1fr_1.6fr_1.1fr_1.7fr_1fr] items-center gap-3 px-4 py-2.5 hover:bg-panel2/50"
-    >
-      <div>
-        <div className="font-mono text-[13px] tabular-nums text-ink">{caso.placa}</div>
-        <div className="text-[11px] text-muted-ink">{caso.tipo_servicio}</div>
-      </div>
-      <div className="text-[12px] text-ink/80">{caso.etapa}</div>
-      <div className="text-[12px] text-muted-ink">{caso.ciudad}</div>
-      <div>
-        <div className="mb-1 flex items-center justify-between font-mono text-[11px] tabular-nums">
-          <span className={s === "rojo" ? "text-sla-red" : "text-ink/80"}>{min} min</span>
-          <span className="text-faint">/ {caso.prometido_min} min</span>
+    <main className="min-h-screen bg-brand-mist text-brand-navy">
+      <header className="mx-auto flex h-20 max-w-[1440px] items-center justify-between px-6 lg:px-10">
+        <Marca />
+        <span className="hidden items-center gap-2 text-xs font-semibold text-brand-blue sm:flex"><span className="size-2 rounded-full bg-sla-green" /> Plataforma operativa disponible</span>
+      </header>
+      <section className="mx-auto grid min-h-[calc(100vh-5rem)] max-w-[1440px] items-center gap-12 px-6 pb-10 pt-8 lg:grid-cols-[1.05fr_.95fr] lg:px-10">
+        <div className="max-w-2xl">
+          <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-brand-sky/30 bg-surface px-3 py-1.5 text-xs font-bold text-brand-blue"><MapPinned className="size-4" /> Operación nacional · Colombia</div>
+          <h1 className="font-display text-5xl font-semibold leading-[1.04] text-brand-navy md:text-7xl">Cada asistencia.<br/><span className="text-brand-blue">Visible a tiempo.</span></h1>
+          <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">INDEGA controla en vivo cada incidente de su flota, desde el primer reporte hasta el cierre.</p>
+          <div className="mt-9 flex flex-wrap gap-3">
+            <Button asChild size="lg" className="h-12 rounded-lg px-6 font-bold shadow-brand"><Link to="/centro">Entrar como Director de Flota <ArrowRight /></Link></Button>
+            <Button asChild size="lg" variant="outline" className="h-12 rounded-lg border-brand-sky/40 bg-surface px-6 text-brand-navy"><Link to="/reportar">Reportar una asistencia</Link></Button>
+          </div>
+          <div className="mt-12 grid gap-5 sm:grid-cols-3">
+            {PASOS.map(({ icon: Icon, titulo, texto }) => <div key={titulo} className="border-l-2 border-brand-sky/40 pl-4"><Icon className="mb-3 size-5 text-brand-blue"/><h2 className="text-sm font-bold">{titulo}</h2><p className="mt-1 text-xs leading-relaxed text-muted-foreground">{texto}</p></div>)}
+          </div>
         </div>
-        <div className="h-1 overflow-hidden rounded-full bg-carbon">
-          <div
-            className={`h-full rounded-full ${COLOR_SEMAFORO[s].fondo} ${s === "rojo" ? "pulse-sla" : ""}`}
-            style={{ width: `${pct}%` }}
-          />
-        </div>
-      </div>
-      <div className="flex items-center justify-end gap-1.5">
-        <span
-          className={`size-1.5 rounded-full ${COLOR_SEMAFORO[s].fondo} ${s === "rojo" ? "pulse-sla" : ""}`}
-        />
-        <span className={`text-[11px] ${COLOR_SEMAFORO[s].texto}`}>{ETIQUETA_SEMAFORO[s]}</span>
-      </div>
-    </Link>
-  );
-}
-
-function Tablero() {
-  const ahora = useAhora();
-  const { data, isLoading, error } = useQuery(casosQuery);
-  const casos = data ?? [];
-  const abiertos = casos.filter(esAbierto);
-  const incumplidos = abiertos.filter((c) => semaforo(c, ahora) === "rojo");
-  const enRiesgo = abiertos.filter((c) => semaforo(c, ahora) === "amarillo");
-  const enAtencion = abiertos.filter((c) =>
-    ["Llegada a sitio", "En atención", "Traslado"].includes(c.etapa),
-  );
-  const cumplimiento =
-    abiertos.length > 0
-      ? Math.round(((abiertos.length - incumplidos.length) / abiertos.length) * 100)
-      : 100;
-
-  return (
-    <>
-      <div className="relative shrink-0 overflow-hidden border-b border-line bg-panel2/60">
-        <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="sweep-y absolute left-0 top-0 h-full w-14 bg-gradient-to-b from-transparent via-cool/10 to-transparent" />
-        </div>
-        <div className="relative flex items-stretch divide-x divide-line">
-          <Kpi etiqueta="Casos abiertos" valor={String(abiertos.length)} nota="en vivo" />
-          <Kpi
-            etiqueta="SLA en curso"
-            valor={`${cumplimiento}%`}
-            nota="meta 90%"
-            tono={cumplimiento < 90 ? "text-sla-amber" : "text-sla-green"}
-          />
-          <Kpi etiqueta="Llegada promedio" valor="54" sufijo="min" nota="cartera 44" />
-          <Kpi etiqueta="En atención" valor={String(enAtencion.length)} nota="en ruta o sitio" />
-          <Kpi
-            etiqueta="Escalamientos"
-            valor={String(incumplidos.length)}
-            nota="requieren acción"
-            tono="text-sla-red"
-          />
-          <Kpi etiqueta="NPS cartera" valor="59" nota="antes 92" />
-        </div>
-      </div>
-
-      <div className="flex gap-3 p-3">
-        <MapaColombia casos={abiertos} ahora={ahora} />
-
-        <section className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-lg bg-panel ring-1 ring-line">
-          <div className="flex h-10 items-center justify-between border-b border-line px-4">
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] uppercase tracking-[0.16em] text-muted-ink">
-                Casos abiertos
-              </span>
-              <span className="rounded bg-panel2 px-1.5 py-0.5 font-mono text-[10px] tabular-nums text-ink/80">
-                {abiertos.length}
-              </span>
+        <div className="relative mx-auto w-full max-w-[560px]">
+          <div className="absolute -inset-5 rounded-[2rem] border border-brand-sky/20" />
+          <div className="relative overflow-hidden rounded-2xl bg-ops-navy p-6 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-ops-line pb-4"><div><p className="text-[10px] font-bold uppercase tracking-[0.16em] text-brand-sky">Cobertura en vivo</p><p className="mt-1 font-display text-xl text-ops-ink">Colombia</p></div><div className="flex items-center gap-2 text-xs text-ops-muted"><span className="size-2 rounded-full bg-sla-green"/> 9 casos activos</div></div>
+            <div className="relative mt-5 h-[390px] overflow-hidden rounded-xl bg-ops-deep"><img src="/colombia-map.svg" alt="Mapa de Colombia" className="absolute inset-0 size-full object-contain p-5 opacity-90"/>
+              {[{x:45,y:22,c:"bg-sla-amber"},{x:43,y:40,c:"bg-sla-green"},{x:51,y:48,c:"bg-sla-red"},{x:39,y:57,c:"bg-sla-green"},{x:49,y:64,c:"bg-sla-amber"}].map((m,i)=><span key={i} className={`absolute size-3 rounded-full ring-4 ring-ops-deep/70 ${m.c}`} style={{left:`${m.x}%`,top:`${m.y}%`}} />)}
             </div>
-            <div className="flex items-center gap-2 font-mono text-[10px] text-faint">
-              <span>Vista Director de Flota</span>
-            </div>
+            <div className="mt-4 flex items-center justify-between text-xs text-ops-muted"><span className="flex items-center gap-2"><CheckCircle2 className="size-4 text-sla-green"/> Actualización cada 15 segundos</span><span className="font-data">COT 09:17:42</span></div>
           </div>
-
-          <div className="grid grid-cols-[1.1fr_1.6fr_1.1fr_1.7fr_1fr] gap-3 border-b border-line px-4 py-2 text-[10px] uppercase tracking-[0.14em] text-faint">
-            <div>Placa / Servicio</div>
-            <div>Etapa actual</div>
-            <div>Ubicación</div>
-            <div>SLA · transcurrido / prometido</div>
-            <div className="text-right">Estado</div>
-          </div>
-
-          <div className="divide-y divide-line">
-            {isLoading ? (
-              <div className="px-4 py-6 text-[12px] text-muted-ink">Cargando casos…</div>
-            ) : error ? (
-              <div className="px-4 py-6 text-[12px] text-sla-red">
-                No fue posible cargar los casos.
-              </div>
-            ) : (
-              abiertos.map((caso) => <Fila key={caso.id} caso={caso} ahora={ahora} />)
-            )}
-          </div>
-
-          <div className="mt-auto flex h-9 items-center justify-between border-t border-line px-4 font-mono text-[10px] tabular-nums text-faint">
-            <span>
-              Mostrando {abiertos.length} de {casos.length}
-            </span>
-            <span className="flex items-center gap-3">
-              <span>Actualización cada 15 s</span>
-              <span className="pulse-sla size-1 rounded-full bg-sla-green" />
-            </span>
-          </div>
-        </section>
-
-        <aside className="flex w-[300px] shrink-0 flex-col overflow-hidden rounded-lg bg-panel ring-1 ring-line">
-          <div className="flex h-10 items-center justify-between border-b border-line px-4">
-            <span className="text-[11px] uppercase tracking-[0.16em] text-muted-ink">
-              Alertas por incumplimiento
-            </span>
-            <span className="font-mono text-[10px] tabular-nums text-sla-red">
-              {incumplidos.length}
-            </span>
-          </div>
-          <div className="divide-y divide-line">
-            {[...incumplidos, ...enRiesgo].slice(0, 6).map((caso) => {
-              const s = semaforo(caso, ahora);
-              const delta = minutosTranscurridos(caso, ahora) - caso.prometido_min;
-              return (
-                <Link
-                  key={caso.id}
-                  to="/caso/$casoId"
-                  params={{ casoId: caso.id }}
-                  className="block px-4 py-3 hover:bg-panel2/50"
-                >
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={`size-1.5 shrink-0 rounded-full ${COLOR_SEMAFORO[s].fondo} ${
-                        s === "rojo" ? "pulse-sla" : ""
-                      }`}
-                    />
-                    <span className="font-mono text-[12px] tabular-nums text-ink">
-                      {caso.placa}
-                    </span>
-                    <span className="ml-auto font-mono text-[10px] text-faint">
-                      {delta >= 0 ? `+${delta} min` : `${delta} min`}
-                    </span>
-                  </div>
-                  <p className="mt-1 text-[11px] leading-snug text-muted-ink">
-                    {s === "rojo"
-                      ? `Superó el tiempo prometido en etapa ${caso.etapa}. Escalar a coordinador regional.`
-                      : `${caso.tipo_servicio} · ${caso.ciudad} · cerca de incumplir.`}
-                  </p>
-                </Link>
-              );
-            })}
-            {incumplidos.length + enRiesgo.length === 0 && (
-              <div className="px-4 py-6 text-[11px] text-muted-ink">
-                Sin casos en riesgo en este momento.
-              </div>
-            )}
-          </div>
-          <div className="mt-auto flex h-9 items-center justify-between border-t border-line px-4 text-[10px] text-faint">
-            <span className="font-mono tabular-nums">Monitoreo continuo</span>
-            <Link to="/alertas" className="text-muted-ink hover:text-ink">
-              Ver todas
-            </Link>
-          </div>
-        </aside>
-      </div>
-    </>
+        </div>
+      </section>
+    </main>
   );
 }

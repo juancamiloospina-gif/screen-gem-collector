@@ -1,85 +1,16 @@
-import { Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { Link, useRouterState } from "@tanstack/react-router";
+import { Bell, ChartNoAxesCombined, LayoutDashboard, LogOut, MessageSquareText, PanelLeft, Search, Siren } from "lucide-react";
+import { useEffect, useState, type ReactNode } from "react";
+import { Button } from "@/components/ui/button";
 
 const NAV = [
-  { to: "/", label: "Tablero" },
-  { to: "/reportar", label: "Reportar incidente" },
-  { to: "/alertas", label: "Alertas" },
-  { to: "/antes-despues", label: "Antes / Después" },
+  { to: "/centro", label: "Centro operativo", icon: LayoutDashboard },
+  { to: "/reportar", label: "Reportar incidente", icon: MessageSquareText },
+  { to: "/alertas", label: "Alertas", icon: Siren },
+  { to: "/antes-despues", label: "Impacto", icon: ChartNoAxesCombined },
 ] as const;
 
-function Reloj() {
-  const [hora, setHora] = useState<string | null>(null);
-  useEffect(() => {
-    const tick = () =>
-      setHora(
-        new Date().toLocaleTimeString("es-CO", {
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-          hour12: false,
-        }),
-      );
-    tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
-  }, []);
-  return (
-    <div className="text-right leading-none">
-      <div className="font-mono text-lg tabular-nums tracking-tight text-ink">{hora ?? "--:--:--"}</div>
-      <div className="text-[9px] uppercase tracking-[0.18em] text-faint">Hora local · COT</div>
-    </div>
-  );
-}
-
-export function ShellHeader() {
-  return (
-    <header className="flex h-14 shrink-0 items-center gap-6 overflow-hidden border-b border-line bg-panel px-5">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-14 overflow-hidden">
-        <div className="sweep-x absolute left-0 top-0 h-14 w-16 bg-gradient-to-r from-transparent via-cool/15 to-transparent" />
-      </div>
-      <div className="relative flex items-center gap-3">
-        <div className="grid size-8 place-items-center rounded bg-gradient-to-br from-cool/70 to-cool/20 ring-1 ring-cool/40">
-          <span className="font-mono text-[13px] font-semibold text-ink">i</span>
-        </div>
-        <div className="leading-none">
-          <div className="text-[15px] font-semibold tracking-tight">INDEGA</div>
-          <div className="text-[10px] uppercase tracking-[0.18em] text-muted-ink">
-            Control de Asistencias
-          </div>
-        </div>
-      </div>
-
-      <nav className="relative ml-2 flex items-center gap-1">
-        {NAV.map((item) => (
-          <Link
-            key={item.to}
-            to={item.to}
-            activeOptions={{ exact: item.to === "/" }}
-            className="rounded px-2.5 py-1.5 text-[12px] text-muted-ink transition-colors hover:bg-panel2 hover:text-ink"
-            activeProps={{ className: "bg-panel2 text-ink" }}
-          >
-            {item.label}
-          </Link>
-        ))}
-      </nav>
-
-      <div className="flex-1" />
-
-      <div className="hidden items-center gap-2 text-[11px] uppercase tracking-[0.14em] text-muted-ink lg:flex">
-        <span className="pulse-sla size-1.5 rounded-full bg-sla-green" />
-        <span className="text-ink/80">En línea</span>
-        <span className="text-faint">·</span>
-        <span className="font-mono text-ink/70">NO-7442</span>
-      </div>
-
-      <div className="flex items-center gap-3">
-        <Reloj />
-        <div className="h-8 w-px bg-line" />
-        <div className="grid size-8 place-items-center rounded-full bg-panel2 text-xs font-medium text-muted-ink ring-1 ring-line">
-          DF
-        </div>
-      </div>
-    </header>
-  );
-}
+function Marca() { return <Link to="/" className="flex items-center gap-3"><div className="grid grid-cols-3 gap-0.5">{["bg-brand-sky","bg-brand-blue","bg-transparent","bg-transparent","bg-brand-blue","bg-ops-ink","bg-transparent","bg-ops-ink","bg-transparent"].map((c,i)=><span key={i} className={`size-2 ${c}`} />)}</div><div><div className="font-display text-lg font-semibold text-ops-ink">AssisPrex</div><div className="text-[9px] font-bold uppercase tracking-[0.16em] text-brand-sky">INDEGA</div></div></Link> }
+function Reloj(){const [hora,setHora]=useState("--:--:--");useEffect(()=>{const tick=()=>setHora(new Date().toLocaleTimeString("es-CO",{hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false}));tick();const id=setInterval(tick,1000);return()=>clearInterval(id)},[]);return <div className="hidden text-right lg:block"><div className="font-data text-sm tabular-nums text-ops-ink">{hora}</div><div className="text-[9px] uppercase tracking-[0.14em] text-ops-muted">Hora Colombia</div></div>}
+function MobileMenu(){const [open,setOpen]=useState(false);return <><Button onClick={()=>setOpen(true)} variant="ghost" size="icon" className="text-ops-muted md:hidden" aria-label="Abrir navegación"><PanelLeft/></Button>{open&&<div className="fixed inset-0 z-50 md:hidden"><button type="button" aria-label="Cerrar navegación" className="absolute inset-0 bg-ops-deep/80" onClick={()=>setOpen(false)}/><aside className="absolute inset-y-0 left-0 w-[82%] max-w-xs border-r border-ops-line bg-ops-navy shadow-2xl"><div className="border-b border-ops-line px-6 py-7"><Marca/></div><nav className="space-y-1 p-3">{NAV.map(({to,label,icon:Icon})=><Link key={to} to={to} onClick={()=>setOpen(false)} activeOptions={{exact:to==="/centro"}} className="flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-semibold text-ops-muted" activeProps={{className:"bg-brand-blue/20 text-brand-sky"}}><Icon className="size-5"/>{label}</Link>)}</nav><div className="absolute inset-x-4 bottom-4"><Link to="/" onClick={()=>setOpen(false)} className="flex items-center gap-2 rounded-lg border border-ops-line p-3 text-xs text-ops-muted"><LogOut className="size-4"/> Salir del centro</Link></div></aside></div>}</>}
+export function AppShell({ children }: { children: ReactNode }){const path=useRouterState({select:s=>s.location.pathname});if(path==="/")return children;return <div className="flex min-h-screen bg-ops-deep text-ops-ink"><aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-ops-line bg-ops-navy md:flex"><div className="px-6 py-7"><Marca/></div><nav className="flex-1 space-y-1 px-3">{NAV.map(({to,label,icon:Icon})=><Link key={to} to={to} activeOptions={{exact:to==="/centro"}} className="flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-semibold text-ops-muted transition-colors hover:bg-ops-panel hover:text-ops-ink" activeProps={{className:"bg-brand-blue/20 text-brand-sky ring-1 ring-brand-blue/30"}}><Icon className="size-5"/>{label}</Link>)}</nav><div className="m-4 rounded-lg border border-ops-line bg-ops-panel/60 p-3"><div className="flex items-center gap-3"><div className="grid size-9 place-items-center rounded-lg bg-brand-blue font-display text-xs font-bold">DF</div><div><p className="text-xs font-bold">Director de Flota</p><p className="text-[10px] text-ops-muted">Sesión de demostración</p></div></div><Link to="/" className="mt-3 flex items-center gap-2 border-t border-ops-line pt-3 text-xs text-ops-muted hover:text-ops-ink"><LogOut className="size-4"/> Salir del centro</Link></div></aside><div className="min-w-0 flex-1 md:pl-64"><header className="sticky top-0 z-20 flex h-18 items-center gap-4 border-b border-ops-line bg-ops-deep/95 px-4 backdrop-blur-xl lg:px-7"><MobileMenu/><div><h1 className="font-display text-sm font-semibold text-ops-ink lg:text-lg">Centro de Operaciones Digital</h1><div className="mt-0.5 flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.14em] text-brand-sky"><span className="size-1.5 rounded-full bg-sla-green"/> Sistema activo</div></div><div className="ml-auto hidden w-full max-w-xs items-center gap-2 rounded-lg border border-ops-line bg-ops-navy px-3 py-2 text-ops-muted lg:flex"><Search className="size-4"/><span className="text-xs">Buscar placa o caso…</span></div><Button asChild size="sm" className="hidden rounded-lg font-bold sm:inline-flex"><Link to="/reportar">Nuevo incidente</Link></Button><Button variant="ghost" size="icon" className="text-ops-muted" aria-label="Ver alertas" asChild><Link to="/alertas"><Bell/></Link></Button><Reloj/></header>{children}</div></div>}

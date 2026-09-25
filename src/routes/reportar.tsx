@@ -1,6 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
+import { Bot, Check, MessageSquareText, Send, Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { CIUDADES, crearCaso, SERVICIOS } from "@/lib/casos";
 
 export const Route = createFileRoute("/reportar")({
@@ -17,6 +19,8 @@ export const Route = createFileRoute("/reportar")({
         property: "og:description",
         content: "Reporte por chat con agente de IA que crea el caso de asistencia.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Reportar,
@@ -152,34 +156,38 @@ function Reportar() {
   }
 
   return (
-    <div className="flex gap-3 p-3">
-      <section className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-lg bg-panel ring-1 ring-line">
-        <div className="flex h-10 items-center justify-between border-b border-line px-4">
-          <span className="text-[11px] uppercase tracking-[0.16em] text-muted-ink">
-            Reportar incidente · canal conductor
-          </span>
-          <span className="flex items-center gap-1.5 font-mono text-[10px] text-faint">
+    <main className="p-4 lg:p-7">
+      <div className="mb-6">
+        <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-brand-sky">Inicio del flujo</p>
+        <h2 className="mt-1 font-display text-2xl font-semibold">Reportar una asistencia</h2>
+        <p className="mt-1 text-xs text-ops-muted">El conductor describe lo ocurrido y el agente de IA estructura el caso.</p>
+      </div>
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
+      <section className="flex min-w-0 flex-col overflow-hidden rounded-xl border border-ops-line bg-ops-navy">
+        <div className="flex h-16 items-center justify-between border-b border-ops-line px-5">
+          <span className="flex items-center gap-3 text-sm font-bold"><span className="grid size-9 place-items-center rounded-lg bg-brand-blue/20 text-brand-sky"><Bot className="size-5" /></span> Agente de asistencia AssisPrex</span>
+          <span className="flex items-center gap-1.5 text-[10px] text-ops-muted">
             <span className="pulse-sla size-1.5 rounded-full bg-sla-green" />
             Agente de IA activo
           </span>
         </div>
 
-        <div className="flex h-[60vh] flex-col gap-3 overflow-y-auto p-4">
+        <div className="flex h-[58vh] min-h-[480px] flex-col gap-4 overflow-y-auto bg-ops-deep/40 p-5">
           {mensajes.map((m, i) => (
             <div
               key={i}
               className={`flex ${m.de === "conductor" ? "justify-end" : "justify-start"}`}
             >
               <div
-                className={`max-w-[68%] rounded-lg px-3 py-2 text-[13px] leading-relaxed whitespace-pre-line ${
+                className={`max-w-[78%] rounded-xl px-4 py-3 text-[13px] leading-relaxed whitespace-pre-line ${
                   m.de === "conductor"
-                    ? "bg-cool/20 text-ink ring-1 ring-cool/30"
-                    : "bg-panel2 text-ink/90 ring-1 ring-line"
+                    ? "bg-brand-blue text-ops-ink"
+                    : "border border-ops-line bg-ops-panel text-ops-ink/90"
                 }`}
               >
                 {m.de === "ia" && (
-                  <div className="mb-1 font-mono text-[9px] uppercase tracking-[0.18em] text-faint">
-                    Agente de IA · INDEGA
+                  <div className="mb-2 flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-[0.16em] text-brand-sky">
+                    <Sparkles className="size-3" /> Agente de IA · AssisPrex
                   </div>
                 )}
                 {m.texto}
@@ -193,18 +201,18 @@ function Reportar() {
         </div>
 
         {pendiente && (
-          <div className="flex items-center gap-3 border-t border-line bg-panel2/60 px-4 py-3">
+          <div className="flex flex-wrap items-center gap-3 border-t border-ops-line bg-ops-panel/60 px-5 py-4">
             <span className="text-[11px] text-muted-ink">
               Confirmar apertura del caso para {pendiente.placa}
             </span>
-            <button
+            <Button
               onClick={confirmar}
               disabled={creando}
-              className="ml-auto rounded bg-cool px-3 py-1.5 text-[12px] font-medium text-carbon transition-opacity hover:opacity-90 disabled:opacity-50"
+              size="sm" className="ml-auto rounded-lg font-bold"
             >
-              {creando ? "Creando…" : "Confirmar y crear caso"}
-            </button>
-            <button
+              <Check className="size-4" /> {creando ? "Creando…" : "Confirmar y crear caso"}
+            </Button>
+            <Button
               onClick={() => {
                 setPendiente(null);
                 agregar({
@@ -213,10 +221,10 @@ function Reportar() {
                   hora: ahoraHora(),
                 });
               }}
-              className="rounded px-3 py-1.5 text-[12px] text-muted-ink hover:text-ink"
+              variant="ghost" size="sm" className="text-ops-muted"
             >
               Corregir
-            </button>
+            </Button>
           </div>
         )}
 
@@ -225,44 +233,46 @@ function Reportar() {
             e.preventDefault();
             enviar(texto);
           }}
-          className="flex items-center gap-2 border-t border-line px-4 py-3"
+          className="flex items-center gap-3 border-t border-ops-line px-5 py-4"
         >
           <input
             ref={inputRef}
             value={texto}
             onChange={(e) => setTexto(e.target.value)}
             placeholder="Escribe lo que pasó, como en un chat…"
-            className="flex-1 rounded bg-carbon px-3 py-2 text-[13px] text-ink outline-none ring-1 ring-line placeholder:text-faint focus:ring-cool/60"
+            className="h-11 flex-1 rounded-lg border border-ops-line bg-ops-deep px-4 text-[13px] text-ops-ink outline-none placeholder:text-ops-muted focus:border-brand-sky"
           />
-          <button
+          <Button
             type="submit"
-            className="rounded bg-panel2 px-3 py-2 text-[12px] text-ink ring-1 ring-line hover:bg-panel2/70"
+            size="icon" className="size-11 rounded-lg" aria-label="Enviar mensaje"
           >
-            Enviar
-          </button>
+            <Send />
+          </Button>
         </form>
       </section>
 
-      <aside className="w-[300px] shrink-0 overflow-hidden rounded-lg bg-panel ring-1 ring-line">
-        <div className="flex h-10 items-center border-b border-line px-4 text-[11px] uppercase tracking-[0.16em] text-muted-ink">
-          Mensajes de ejemplo
+      <aside className="overflow-hidden rounded-xl border border-ops-line bg-ops-navy">
+        <div className="border-b border-ops-line p-5">
+          <MessageSquareText className="size-5 text-brand-sky" />
+          <h3 className="mt-3 text-sm font-bold">Probar con un ejemplo</h3>
+          <p className="mt-1 text-[10px] text-ops-muted">Selecciona un reporte para ver el flujo completo.</p>
         </div>
-        <div className="divide-y divide-line">
+        <div className="divide-y divide-ops-line">
           {EJEMPLOS.map((e) => (
-            <button
+            <Button
               key={e}
               onClick={() => enviar(e)}
-              className="block w-full px-4 py-3 text-left text-[12px] leading-snug text-muted-ink hover:bg-panel2/50 hover:text-ink"
+              variant="ghost" className="h-auto w-full justify-start whitespace-normal rounded-none px-5 py-4 text-left text-[11px] leading-relaxed text-ops-muted hover:bg-ops-panel hover:text-ops-ink"
             >
               {e}
-            </button>
+            </Button>
           ))}
         </div>
-        <p className="px-4 py-3 text-[11px] leading-snug text-faint">
+        <p className="px-5 py-4 text-[10px] leading-relaxed text-ops-muted">
           Demo: el agente de IA responde con un guion preparado. La integración con WhatsApp
           Business queda fuera de este prototipo.
         </p>
-      </aside>
-    </div>
+      </aside></div>
+    </main>
   );
 }
