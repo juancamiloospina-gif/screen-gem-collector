@@ -14,7 +14,89 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      casos: {
+        Row: {
+          actualizado_en: string
+          ciudad: string
+          creado_en: string
+          etapa: Database["public"]["Enums"]["etapa_caso"]
+          id: string
+          mapa_x: number
+          mapa_y: number
+          numero: number
+          origen: string
+          placa: string
+          prometido_min: number
+          tipo_servicio: string
+          tipo_vehiculo: string
+          ubicacion: string
+        }
+        Insert: {
+          actualizado_en?: string
+          ciudad: string
+          creado_en?: string
+          etapa?: Database["public"]["Enums"]["etapa_caso"]
+          id?: string
+          mapa_x?: number
+          mapa_y?: number
+          numero?: number
+          origen?: string
+          placa: string
+          prometido_min?: number
+          tipo_servicio: string
+          tipo_vehiculo?: string
+          ubicacion?: string
+        }
+        Update: {
+          actualizado_en?: string
+          ciudad?: string
+          creado_en?: string
+          etapa?: Database["public"]["Enums"]["etapa_caso"]
+          id?: string
+          mapa_x?: number
+          mapa_y?: number
+          numero?: number
+          origen?: string
+          placa?: string
+          prometido_min?: number
+          tipo_servicio?: string
+          tipo_vehiculo?: string
+          ubicacion?: string
+        }
+        Relationships: []
+      }
+      eventos_caso: {
+        Row: {
+          caso_id: string
+          etapa: Database["public"]["Enums"]["etapa_caso"]
+          id: string
+          nota: string | null
+          ocurrido_en: string
+        }
+        Insert: {
+          caso_id: string
+          etapa: Database["public"]["Enums"]["etapa_caso"]
+          id?: string
+          nota?: string | null
+          ocurrido_en?: string
+        }
+        Update: {
+          caso_id?: string
+          etapa?: Database["public"]["Enums"]["etapa_caso"]
+          id?: string
+          nota?: string | null
+          ocurrido_en?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "eventos_caso_caso_id_fkey"
+            columns: ["caso_id"]
+            isOneToOne: false
+            referencedRelation: "casos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +105,15 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      etapa_caso:
+        | "Creación"
+        | "Trámite"
+        | "Asignado"
+        | "Llegada a sitio"
+        | "En atención"
+        | "Traslado"
+        | "Finalizado"
+        | "Cierre"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +240,17 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      etapa_caso: [
+        "Creación",
+        "Trámite",
+        "Asignado",
+        "Llegada a sitio",
+        "En atención",
+        "Traslado",
+        "Finalizado",
+        "Cierre",
+      ],
+    },
   },
 } as const
