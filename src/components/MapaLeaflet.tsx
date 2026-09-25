@@ -64,6 +64,9 @@ function iconoCiudad(total: number, clase: string) {
   });
 }
 
+// Gravedad del semáforo, para pintar cada burbuja con su peor caso.
+const orden = { verde: 0, amarillo: 1, rojo: 2 } as const;
+
 const ZOOM_CIUDAD = 11;
 // Por debajo de este zoom se agrupan los casos por ciudad.
 const ZOOM_AGRUPAR = 8;
@@ -145,7 +148,6 @@ export default function MapaLeaflet({
   setCiudad: (c: string | null) => void;
 }) {
   const [zoom, setZoom] = useState(5);
-  const orden = { verde: 0, amarillo: 1, rojo: 2 } as const;
   const grupos = useMemo(
     () =>
       Object.keys(CIUDAD_LATLON)
