@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AlertasRouteImport } from './routes/alertas'
 import { Route as AntesDespuesRouteImport } from './routes/antes-despues'
+import { Route as CentroRouteImport } from './routes/centro'
 import { Route as ReportarRouteImport } from './routes/reportar'
 import { Route as CasoCasoIdRouteImport } from './routes/caso.$casoId'
 
@@ -30,6 +31,11 @@ const AntesDespuesRoute = AntesDespuesRouteImport.update({
   path: '/antes-despues',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CentroRoute = CentroRouteImport.update({
+  id: '/centro',
+  path: '/centro',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ReportarRoute = ReportarRouteImport.update({
   id: '/reportar',
   path: '/reportar',
@@ -45,6 +51,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/alertas': typeof AlertasRoute
   '/antes-despues': typeof AntesDespuesRoute
+  '/centro': typeof CentroRoute
   '/reportar': typeof ReportarRoute
   '/caso/$casoId': typeof CasoCasoIdRoute
 }
@@ -52,6 +59,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/alertas': typeof AlertasRoute
   '/antes-despues': typeof AntesDespuesRoute
+  '/centro': typeof CentroRoute
   '/reportar': typeof ReportarRoute
   '/caso/$casoId': typeof CasoCasoIdRoute
 }
@@ -60,19 +68,33 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/alertas': typeof AlertasRoute
   '/antes-despues': typeof AntesDespuesRoute
+  '/centro': typeof CentroRoute
   '/reportar': typeof ReportarRoute
   '/caso/$casoId': typeof CasoCasoIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/alertas' | '/antes-despues' | '/reportar' | '/caso/$casoId'
+  fullPaths:
+    | '/'
+    | '/alertas'
+    | '/antes-despues'
+    | '/centro'
+    | '/reportar'
+    | '/caso/$casoId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/alertas' | '/antes-despues' | '/reportar' | '/caso/$casoId'
+  to:
+    | '/'
+    | '/alertas'
+    | '/antes-despues'
+    | '/centro'
+    | '/reportar'
+    | '/caso/$casoId'
   id:
     | '__root__'
     | '/'
     | '/alertas'
     | '/antes-despues'
+    | '/centro'
     | '/reportar'
     | '/caso/$casoId'
   fileRoutesById: FileRoutesById
@@ -81,6 +103,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AlertasRoute: typeof AlertasRoute
   AntesDespuesRoute: typeof AntesDespuesRoute
+  CentroRoute: typeof CentroRoute
   ReportarRoute: typeof ReportarRoute
   CasoCasoIdRoute: typeof CasoCasoIdRoute
 }
@@ -108,6 +131,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AntesDespuesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/centro': {
+      id: '/centro'
+      path: '/centro'
+      fullPath: '/centro'
+      preLoaderRoute: typeof CentroRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/reportar': {
       id: '/reportar'
       path: '/reportar'
@@ -129,6 +159,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AlertasRoute: AlertasRoute,
   AntesDespuesRoute: AntesDespuesRoute,
+  CentroRoute: CentroRoute,
   ReportarRoute: ReportarRoute,
   CasoCasoIdRoute: CasoCasoIdRoute,
 }
