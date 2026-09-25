@@ -27,22 +27,31 @@ export function MapaColombia({ casos, ahora }: { casos: Caso[]; ahora: number })
         <div className="absolute left-[24%] top-[12%] h-[70%] w-[46%] rounded-[40%_60%_55%_45%/50%_45%_60%_50%] bg-panel2/70 ring-1 ring-cool/20" />
         <div className="absolute left-[40%] top-[64%] h-[26%] w-[30%] rounded-[50%_50%_45%_55%] bg-panel2/60 ring-1 ring-cool/20" />
 
-        {casos.map((caso) => {
+        {casos.map((caso, i) => {
           const s = semaforo(caso, ahora);
+          // Reparte los casos de una misma ciudad para que los pines no se pisen.
+          const mismos = casos.filter((c) => c.ciudad === caso.ciudad);
+          const idx = mismos.findIndex((c) => c.id === caso.id);
+          const dx = (idx % 2 === 0 ? 1 : -1) * Math.ceil(idx / 2) * 7;
+          const dy = idx * 5;
           return (
             <Link
               key={caso.id}
               to="/caso/$casoId"
               params={{ casoId: caso.id }}
               className="absolute"
-              style={{ left: `${caso.mapa_x}%`, top: `${caso.mapa_y}%` }}
+              style={{
+                left: `${caso.mapa_x + dx}%`,
+                top: `${caso.mapa_y + dy}%`,
+                zIndex: 10 + i,
+              }}
             >
               <div
                 className={`size-2.5 rounded-full ring-2 ring-carbon ${COLOR_SEMAFORO[s].fondo} ${
                   s === "rojo" ? "pulse-sla" : ""
                 }`}
               />
-              <div className="absolute left-1/2 mt-1 -translate-x-1/2 whitespace-nowrap rounded bg-carbon/70 px-1 font-mono text-[9px] text-ink/80">
+              <div className="absolute left-1/2 mt-1 -translate-x-1/2 whitespace-nowrap rounded bg-carbon/80 px-1 font-mono text-[9px] text-ink/80">
                 {caso.placa}
               </div>
             </Link>
