@@ -1,6 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Bot, CheckCircle2, MapPinned, Radio, ShieldCheck } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { MapaBase, posicionEnCiudad } from "@/components/MapaBase";
+import { useAhora } from "@/hooks/use-ahora";
+import { COLOR_SEMAFORO, casosQuery, esAbierto, semaforo } from "@/lib/casos";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -33,7 +38,21 @@ function Marca() {
   );
 }
 
+function RelojCOT() {
+  const [hora, setHora] = useState("--:--:--");
+  useEffect(() => {
+    const tick = () => setHora(new Date().toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }));
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, []);
+  return <span className="font-data">COT {hora}</span>;
+}
+
 function Inicio() {
+  const ahora = useAhora();
+  const { data } = useQuery(casosQuery);
+  const abiertos = (data ?? []).filter(esAbierto);
   return (
     <main className="min-h-screen bg-brand-mist text-brand-navy">
       <header className="mx-auto flex h-20 max-w-[1440px] items-center justify-between px-6 lg:px-10">
@@ -56,11 +75,12 @@ function Inicio() {
         <div className="relative mx-auto w-full max-w-[560px]">
           <div className="absolute -inset-5 rounded-[2rem] border border-brand-sky/20" />
           <div className="relative overflow-hidden rounded-2xl bg-ops-navy p-6 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-ops-line pb-4"><div><p className="text-[10px] font-bold uppercase tracking-[0.16em] text-brand-sky">Cobertura en vivo</p><p className="mt-1 font-display text-xl text-ops-ink">Colombia</p></div><div className="flex items-center gap-2 text-xs text-ops-muted"><span className="size-2 rounded-full bg-sla-green"/> 9 casos activos</div></div>
-            <div className="relative mt-5 h-[390px] overflow-hidden rounded-xl bg-ops-deep"><img src="/colombia-map.svg" alt="Mapa de Colombia" className="absolute inset-0 size-full object-contain p-5 opacity-90"/>
-              {[{x:45,y:22,c:"bg-sla-amber"},{x:43,y:40,c:"bg-sla-green"},{x:51,y:48,c:"bg-sla-red"},{x:39,y:57,c:"bg-sla-green"},{x:49,y:64,c:"bg-sla-amber"}].map((m,i)=><span key={i} className={`absolute size-3 rounded-full ring-4 ring-ops-deep/70 ${m.c}`} style={{left:`${m.x}%`,top:`${m.y}%`}} />)}
+            <div className="flex items-center justify-between border-b border-ops-line pb-4"><div><p className="text-[10px] font-bold uppercase tracking-[0.16em] text-brand-sky">Cobertura en vivo</p><p className="mt-1 font-display text-xl text-ops-ink">Colombia</p></div><div className="flex items-center gap-2 text-xs text-ops-muted"><span className="size-2 rounded-full bg-sla-green"/> {data ? `${abiertos.length} casos activos` : "Cargando…"}</div></div>
+            <div className="relative mt-5 h-[390px] overflow-hidden rounded-xl bg-ops-deep"><MapaBase className="p-5" opacidad="opacity-90">
+              {abiertos.map((c)=>{const idx=abiertos.filter(o=>o.ciudad===c.ciudad).findIndex(o=>o.id===c.id);const {x,y}=posicionEnCiudad(c.ciudad,idx,2);return <span key={c.id} title={`${c.placa} · ${c.ciudad}`} className={`absolute size-3 -translate-x-1/2 -translate-y-1/2 rounded-full ring-4 ring-ops-deep/70 ${COLOR_SEMAFORO[semaforo(c,ahora)].fondo}`} style={{left:`${x}%`,top:`${y}%`}} />})}
+              </MapaBase>
             </div>
-            <div className="mt-4 flex items-center justify-between text-xs text-ops-muted"><span className="flex items-center gap-2"><CheckCircle2 className="size-4 text-sla-green"/> Actualización cada 15 segundos</span><span className="font-data">COT 09:17:42</span></div>
+            <div className="mt-4 flex items-center justify-between text-xs text-ops-muted"><span className="flex items-center gap-2"><CheckCircle2 className="size-4 text-sla-green"/> Actualización cada 15 segundos</span><RelojCOT /></div>
           </div>
         </div>
       </section>
