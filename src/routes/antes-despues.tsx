@@ -14,6 +14,8 @@ export const Route = createFileRoute("/antes-despues")({
         property: "og:description",
         content: "54 minutos y cero visibilidad frente a seguimiento en vivo con alertas.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: AntesDespues,
@@ -47,12 +49,12 @@ function Columna({
   tono: string;
 }) {
   return (
-    <section className="flex-1 overflow-hidden rounded-lg bg-panel ring-1 ring-line">
-      <div className="border-b border-line px-5 py-4">
+    <section className="flex-1 overflow-hidden rounded-xl border border-ops-line bg-ops-navy">
+      <div className="border-b border-ops-line px-5 py-5">
         <div className="text-[11px] uppercase tracking-[0.16em] text-muted-ink">{titulo}</div>
         <div className={`mt-1 text-[15px] ${tono}`}>{subtitulo}</div>
       </div>
-      <div className="divide-y divide-line">
+      <div className="divide-y divide-ops-line">
         {filas.map((f) => (
           <div key={f.k} className="px-5 py-4">
             <div className="text-[10px] uppercase tracking-[0.16em] text-faint">{f.k}</div>
@@ -69,18 +71,19 @@ function Columna({
 
 function AntesDespues() {
   return (
-    <div className="p-3">
-      <div className="mb-3 rounded-lg bg-panel px-5 py-4 ring-1 ring-line">
+    <main className="p-4 lg:p-7">
+      <div className="mb-6">
         <div className="text-[11px] uppercase tracking-[0.16em] text-muted-ink">
           Antes / Después
         </div>
-        <p className="mt-1 max-w-3xl text-[13px] leading-relaxed text-ink/80">
+        <h2 className="mt-1 font-display text-2xl font-semibold">De reacción tardía a control en vivo</h2>
+        <p className="mt-2 max-w-3xl text-[13px] leading-relaxed text-ops-muted">
           El problema de hoy no es solo el tiempo de llegada: es que INDEGA no puede verlo mientras
           ocurre. Con este modelo, cada caso se mide contra su tiempo prometido y el incumplimiento
           se avisa en el momento, no semanas después.
         </p>
       </div>
-      <div className="flex gap-3">
+      <div className="grid gap-5 lg:grid-cols-2">
         <Columna
           titulo="Hoy · sin visibilidad"
           subtitulo="La flota se entera cuando ya es tarde"
@@ -94,6 +97,6 @@ function AntesDespues() {
           tono="text-sla-green"
         />
       </div>
-    </div>
+    </main>
   );
 }
