@@ -223,3 +223,37 @@ export const CONCILIACION_CARTERA = [
     accion: "Corregir tipo",
   },
 ];
+
+// SLA de los últimos 30 días por cliente y campaña (cuentas B2C ficticias).
+// `meta` es el porcentaje de casos que deben cumplir el tiempo prometido.
+export const SLA_CLIENTES_30D = [
+  { cliente: "Aseguradora Andina", campana: "Todo Riesgo Plus", casos: 142, pct: 93, meta: 95 },
+  { cliente: "Aseguradora Andina", campana: "Básico Asistencia", casos: 188, pct: 84, meta: 90 },
+  { cliente: "Seguros del Pacífico", campana: "SOAT + Asistencia", casos: 121, pct: 88, meta: 90 },
+  { cliente: "Seguros del Pacífico", campana: "Plan Familiar", casos: 97, pct: 91, meta: 90 },
+  { cliente: "Banco Cordillera", campana: "Tarjeta Gold", casos: 76, pct: 96, meta: 95 },
+  { cliente: "Banco Cordillera", campana: "Crédito Vehicular", casos: 64, pct: 79, meta: 90 },
+  { cliente: "Autos Fénix", campana: "Garantía Extendida", casos: 83, pct: 92, meta: 90 },
+  { cliente: "Autos Fénix", campana: "Renting Personas", casos: 52, pct: 89, meta: 90 },
+];
+
+export const SLA_CIUDADES_30D: Record<string, number> = {
+  Bogotá: 89,
+  Medellín: 91,
+  Barranquilla: 82,
+  Cali: 85,
+  Neiva: 93,
+};
+
+export const SLA_FAMILIAS_30D: Record<string, number> = {
+  "Grúa liviana": 90,
+  "Grúa pesada": 74,
+  "Carro taller": 88,
+  CE: 96,
+};
+
+// Canales por los que llegó la solicitud hoy (datos de ejemplo).
+export const CANALES_HOY = [
+  { canal: "WhatsApp", pct: 72 },
+  { canal: "Línea telefónica (agente de voz)", pct: 28 },
+];

@@ -62,21 +62,39 @@ export function Panel({
   );
 }
 
+const ACENTO = {
+  rojo: "border-l-sla-red",
+  ambar: "border-l-sla-amber",
+  verde: "border-l-sla-green",
+  azul: "border-l-brand-sky",
+};
+
 export function Kpi({
   label,
   value,
   note,
   tone = "text-ops-ink",
+  acento,
+  grande = false,
 }: {
   label: string;
   value: string;
   note?: string;
   tone?: string;
+  // Franja de color a la izquierda: marca el KPI como prioridad.
+  acento?: keyof typeof ACENTO | undefined;
+  grande?: boolean;
 }) {
   return (
-    <div className="rounded-xl border border-ops-line bg-ops-navy p-4">
+    <div
+      className={`rounded-xl border border-ops-line bg-ops-navy p-4 ${
+        acento ? `border-l-4 ${ACENTO[acento]}` : ""
+      }`}
+    >
       <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-ops-muted">{label}</p>
-      <p className={`mt-2 font-display text-2xl font-semibold ${tone}`}>{value}</p>
+      <p className={`mt-2 font-display font-semibold ${grande ? "text-4xl" : "text-2xl"} ${tone}`}>
+        {value}
+      </p>
       {note && <p className="mt-1 text-[10px] text-ops-muted">{note}</p>}
     </div>
   );

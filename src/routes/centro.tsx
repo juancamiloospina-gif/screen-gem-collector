@@ -1,11 +1,251 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, Clock3, Radio, Siren, TimerReset } from "lucide-react";
+import { useState } from "react";
+import { ArrowRight, Timer } from "lucide-react";
+import { CapacidadRed } from "@/components/capacidad-red";
 import { MapaColombia } from "@/components/MapaColombia";
+import { MatrizDolor } from "@/components/matriz-dolor";
+import { MonitorCasos } from "@/components/monitor-casos";
+import { Encabezado, Kpi, Panel } from "@/components/ops";
+import { PorVencerLista } from "@/components/por-vencer";
+import { ProcesoNav } from "@/components/proceso-nav";
+import { SlaPanel } from "@/components/sla-panel";
 import { useAhora } from "@/hooks/use-ahora";
-import { casosQuery, COLOR_SEMAFORO, ETIQUETA_SEMAFORO, esAbierto, minutosTranscurridos, semaforo, type Caso } from "@/lib/casos";
+import {
+  COLOR_SEMAFORO,
+  VENTANA_PREDICTIVA_MIN,
+  casosQuery,
+  esAbierto,
+  estaInactivo,
+  minutosTranscurridos,
+  semaforo,
+  type Familia,
+} from "@/lib/casos";
+import { casosPorVencer, ordenarPorPrioridad } from "@/lib/procesos";
+import { capacidadPorCiudad, estadoCiudad } from "@/lib/red";
+import { META_SLA, semaforoSla, slaGlobal } from "@/lib/sla";
 
-export const Route = createFileRoute("/centro")({head:()=>({meta:[{title:"Centro operativo · AssisPrex INDEGA"},{name:"description",content:"Monitoreo nacional en vivo de asistencias vehiculares, tiempos y alertas para INDEGA."},{property:"og:title",content:"Centro operativo · AssisPrex INDEGA"},{property:"og:description",content:"Mapa y control en vivo de la operación nacional de asistencias."},{property:"og:type",content:"website"},{name:"twitter:card",content:"summary_large_image"}]}),component:Centro});
-function Kpi({label,value,note,icon:Icon,tone="text-ops-ink"}:{label:string;value:string;note:string;icon:typeof Radio;tone?:string}){return <div className="rounded-lg border border-ops-line bg-ops-navy p-4"><div className="flex items-center justify-between"><p className="text-[9px] font-bold uppercase tracking-[0.14em] text-ops-muted">{label}</p><Icon className={`size-4 ${tone}`}/></div><p className={`mt-3 font-display text-2xl font-semibold ${tone}`}>{value}</p><p className="mt-1 text-[10px] text-ops-muted">{note}</p></div>}
-function CaseRow({caso,ahora}:{caso:Caso;ahora:number}){const s=semaforo(caso,ahora),min=minutosTranscurridos(caso,ahora),pct=Math.min(100,Math.round(min/caso.prometido_min*100));return <Link to="/caso/$casoId" params={{casoId:caso.id}} className="block border-t border-ops-line px-4 py-3 transition-colors hover:bg-ops-panel/60"><div className="sm:hidden"><div className="flex items-center gap-2"><span className={`size-2 shrink-0 rounded-full ${COLOR_SEMAFORO[s].fondo}`}/><span className="font-data text-xs font-medium">{caso.placa}</span><span className="text-[10px] text-ops-muted">#{caso.numero}</span><span className="ml-auto text-[10px] text-ops-muted">{caso.ciudad}</span></div><p className="mt-2 truncate text-xs">{caso.tipo_servicio}</p><div className="mt-2 flex items-center justify-between gap-3 text-[10px]"><span className="text-ops-muted">Etapa: <span className="text-ops-ink/90">{caso.etapa}</span></span><span className={`shrink-0 font-data ${COLOR_SEMAFORO[s].texto}`}>{min} / {caso.prometido_min} min</span></div><div className="mt-2 h-1.5 overflow-hidden rounded-full bg-ops-deep"><div className={`h-full ${COLOR_SEMAFORO[s].fondo}`} style={{width:`${pct}%`}}/></div></div><div className="hidden grid-cols-[1.1fr_1.2fr_.8fr_1fr_auto] items-center gap-3 sm:grid"><div><p className="font-data text-xs font-medium">{caso.placa}</p><p className="mt-0.5 truncate text-[10px] text-ops-muted">#{caso.numero} · {caso.tipo_servicio}</p></div><p className="truncate text-xs text-ops-ink/90">{caso.etapa}</p><p className="text-xs text-ops-muted">{caso.ciudad}</p><div><div className="mb-1 flex justify-between font-data text-[9px]"><span>{min} min</span><span className="text-ops-muted">{caso.prometido_min} min</span></div><div className="h-1.5 overflow-hidden rounded-full bg-ops-deep"><div className={`h-full ${COLOR_SEMAFORO[s].fondo}`} style={{width:`${pct}%`}}/></div></div><div className={`flex items-center gap-2 text-[10px] font-bold ${COLOR_SEMAFORO[s].texto}`}><span className={`size-2 rounded-full ${COLOR_SEMAFORO[s].fondo}`}/><span className="hidden 2xl:inline">{ETIQUETA_SEMAFORO[s]}</span><ArrowRight className="size-3 text-ops-muted"/></div></div></Link>}
-function Centro(){const ahora=useAhora();const {data,isLoading,error}=useQuery(casosQuery);const casos=data??[],abiertos=casos.filter(esAbierto),rojos=abiertos.filter(c=>semaforo(c,ahora)==="rojo"),amarillos=abiertos.filter(c=>semaforo(c,ahora)==="amarillo"),atencion=abiertos.filter(c=>["Llegada a sitio","En atención","Traslado"].includes(c.etapa));const cumplimiento=abiertos.length?Math.round((abiertos.length-rojos.length)/abiertos.length*100):100;return <main className="p-4 lg:p-6"><div className="mb-5 flex items-end justify-between"><div><p className="text-[10px] font-bold uppercase tracking-[0.16em] text-brand-sky">Vista Director de Flota</p><h2 className="mt-1 font-display text-2xl font-semibold">Operación nacional</h2><p className="mt-1 text-xs text-ops-muted">Prioridad, ubicación y cumplimiento en una sola vista.</p></div><p className="hidden text-xs text-ops-muted sm:block">Actualización automática · 15 s</p></div><div className="grid grid-cols-2 gap-3 lg:grid-cols-4"><Kpi label="Casos abiertos" value={String(abiertos.length)} note="Operación en vivo" icon={Radio} tone="text-brand-sky"/><Kpi label="Cumplimiento SLA" value={`${cumplimiento}%`} note="Meta operativa 90%" icon={TimerReset} tone={cumplimiento<90?"text-sla-amber":"text-sla-green"}/><Kpi label="Llegada promedio" value="54 min" note="Resto de cartera: 44 min" icon={Clock3}/><Kpi label="Escalamientos" value={String(rojos.length)} note={`${atencion.length} en atención`} icon={Siren} tone="text-sla-red"/></div><div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1.7fr)_minmax(360px,.85fr)]"><MapaColombia casos={abiertos} ahora={ahora}/><aside className="flex min-h-[520px] flex-col overflow-hidden rounded-xl border border-ops-line bg-ops-navy xl:min-h-[650px]"><div className="border-b border-ops-line p-5"><div className="flex items-center justify-between"><div><p className="text-[9px] font-bold uppercase tracking-[0.15em] text-brand-sky">Prioridad operativa</p><h3 className="mt-1 font-display text-lg font-semibold">Casos que requieren atención</h3></div><span className="rounded-md bg-sla-red/15 px-2 py-1 font-data text-[10px] text-sla-red">{rojos.length} críticos</span></div></div><div className="flex-1 divide-y divide-ops-line overflow-y-auto">{[...rojos,...amarillos,...abiertos.filter(c=>!rojos.includes(c)&&!amarillos.includes(c))].slice(0,7).map(c=>{const s=semaforo(c,ahora);return <Link key={c.id} to="/caso/$casoId" params={{casoId:c.id}} className="block p-4 hover:bg-ops-panel/60"><div className="flex items-center gap-2"><span className={`size-2 rounded-full ${COLOR_SEMAFORO[s].fondo}`}/><span className="font-data text-xs font-medium">{c.placa}</span><span className="ml-auto text-[10px] text-ops-muted">{c.ciudad}</span></div><p className="mt-2 truncate text-xs">{c.tipo_servicio}</p><div className="mt-2 flex items-center justify-between text-[10px] text-ops-muted"><span>{c.etapa}</span><span className={COLOR_SEMAFORO[s].texto}>{minutosTranscurridos(c,ahora)} / {c.prometido_min} min</span></div></Link>})}</div><Link to="/alertas" className="flex items-center justify-between border-t border-ops-line bg-ops-deep/50 px-5 py-4 text-xs font-bold text-brand-sky">Ver todas las alertas <ArrowRight className="size-4"/></Link></aside></div><section className="mt-5 overflow-hidden rounded-xl border border-ops-line bg-ops-navy"><div className="flex items-center justify-between px-4 py-4"><div><p className="text-[9px] font-bold uppercase tracking-[0.15em] text-brand-sky">Monitor de casos</p><h3 className="mt-1 text-sm font-bold">Todas las asistencias abiertas</h3></div><span className="font-data text-[10px] text-ops-muted">{abiertos.length} registros</span></div><div className="hidden grid-cols-[1.1fr_1.2fr_.8fr_1fr_auto] gap-3 border-t border-ops-line bg-ops-deep/50 px-4 py-2 text-[9px] font-bold uppercase tracking-[0.12em] text-ops-muted sm:grid"><span>Vehículo</span><span>Etapa</span><span>Ciudad</span><span>SLA</span><span>Estado</span></div>{isLoading?<p className="border-t border-ops-line p-5 text-xs text-ops-muted">Cargando casos…</p>:error?<p className="border-t border-ops-line p-5 text-xs text-sla-red">No fue posible cargar los casos.</p>:abiertos.map(c=><CaseRow key={c.id} caso={c} ahora={ahora}/>)}</section></main>}
+export const Route = createFileRoute("/centro")({
+  head: () => ({
+    meta: [
+      { title: "Centro operativo · AssisPrex INDEGA" },
+      {
+        name: "description",
+        content:
+          "Monitoreo nacional en vivo de asistencias vehiculares, tiempos y alertas para INDEGA.",
+      },
+      { property: "og:title", content: "Centro operativo · AssisPrex INDEGA" },
+      {
+        property: "og:description",
+        content: "Mapa y control en vivo de la operación nacional de asistencias.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
+  component: Centro,
+});
+
+const TONO_SEMAFORO_KPI = { verde: "verde", amarillo: "ambar", rojo: "rojo" } as const;
+
+function Centro() {
+  const ahora = useAhora();
+  const { data, isLoading, error } = useQuery(casosQuery);
+  const [ciudad, setCiudad] = useState<string | null>(null);
+  const [familia, setFamilia] = useState<Familia | null>(null);
+
+  const casos = data ?? [];
+  const abiertos = casos.filter(esAbierto);
+  const rojos = ordenarPorPrioridad(
+    abiertos.filter((c) => semaforo(c, ahora) === "rojo"),
+    ahora,
+  );
+  const venciendo = casosPorVencer(abiertos, ahora);
+  const inactivos = abiertos.filter((c) => estaInactivo(c, ahora));
+  const sla = slaGlobal(casos, ahora);
+  const sSla = semaforoSla(sla.pct, META_SLA);
+  const capacidad = capacidadPorCiudad(casos);
+  const deficits = capacidad.flatMap((c) =>
+    estadoCiudad(c).deficits.map((d) => `${c.ciudad} · ${d.familia}`),
+  );
+  const ajustadas = capacidad.filter((c) => estadoCiudad(c).semaforo === "amarillo").length;
+  const sRed = deficits.length ? "rojo" : ajustadas ? "amarillo" : "verde";
+
+  function elegir(c: string | null, f: Familia | null) {
+    setCiudad(c);
+    setFamilia(f);
+  }
+
+  return (
+    <main className="p-4 lg:p-6">
+      <Encabezado
+        eyebrow="Vista Director de Flota"
+        titulo="Operación nacional"
+        texto="Primero lo crítico y lo que está por vencerse; después dónde duele, cómo va el SLA contra la meta y si la red alcanza."
+      >
+        <p className="hidden text-xs text-ops-muted sm:block">Actualización automática · 15 s</p>
+      </Encabezado>
+
+      {/* 1. KPIs por prioridad */}
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-6">
+        <Kpi
+          label="Casos críticos"
+          value={String(rojos.length)}
+          note="Ya superaron el tiempo prometido"
+          tone="text-sla-red"
+          acento="rojo"
+          grande
+        />
+        <Kpi
+          label={`Por vencerse ≤ ${VENTANA_PREDICTIVA_MIN} min`}
+          value={String(venciendo.length)}
+          note="Predictivo: actuar antes del incumplimiento"
+          tone="text-sla-amber"
+          acento="ambar"
+          grande
+        />
+        <Kpi
+          label="Cumplimiento SLA"
+          value={sla.pct === null ? "—" : `${sla.pct}%`}
+          note={`Meta ${META_SLA}% · 30 días ${sla.pct30d}%`}
+          tone={sSla ? COLOR_SEMAFORO[sSla].texto : "text-ops-ink"}
+          acento={sSla ? TONO_SEMAFORO_KPI[sSla] : undefined}
+          grande
+        />
+        <Kpi
+          label="Red sin capacidad"
+          value={String(deficits.length)}
+          note={
+            deficits.length
+              ? `Faltan unidades: ${deficits.slice(0, 2).join("; ")}${deficits.length > 2 ? ` y ${deficits.length - 2} más` : ""}`
+              : ajustadas
+                ? `${ajustadas} ciudades sin holgura`
+                : "La red alcanza en todas las ciudades"
+          }
+          tone={COLOR_SEMAFORO[sRed].texto}
+          acento={TONO_SEMAFORO_KPI[sRed]}
+          grande
+        />
+        <Kpi
+          label="Sin movimiento"
+          value={String(inactivos.length)}
+          note="Superan el tiempo de su etapa"
+          tone={inactivos.length ? "text-sla-red" : "text-sla-green"}
+        />
+        <Kpi
+          label="Casos abiertos"
+          value={String(abiertos.length)}
+          note="Operación en vivo"
+          tone="text-brand-sky"
+        />
+      </div>
+
+      {/* 2. Una vista por proceso crítico */}
+      <div className="mt-5">
+        <p className="mb-2 text-[9px] font-bold uppercase tracking-[0.15em] text-brand-sky">
+          Procesos críticos
+        </p>
+        <ProcesoNav casos={casos} ahora={ahora} activo={null} />
+      </div>
+
+      {/* 3. Dónde está el dolor + predictivo */}
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
+        <MatrizDolor
+          casos={casos}
+          ahora={ahora}
+          ciudad={ciudad}
+          familia={familia}
+          onSelect={elegir}
+        />
+        <div className="space-y-5">
+          <Panel
+            eyebrow="Predictivo"
+            titulo={`Se vencen en los próximos ${VENTANA_PREDICTIVA_MIN} min`}
+            accion={<Timer className="size-4 text-sla-amber" />}
+          >
+            <PorVencerLista casos={casos} ahora={ahora} limite={5} />
+          </Panel>
+          <Panel
+            eyebrow="Prioridad operativa"
+            titulo="Críticos ahora"
+            accion={
+              <span className="rounded-md bg-sla-red/15 px-2 py-1 font-data text-[10px] text-sla-red">
+                {rojos.length}
+              </span>
+            }
+          >
+            <ul className="divide-y divide-ops-line">
+              {rojos.length === 0 && (
+                <li className="px-5 py-4 text-[11px] text-ops-muted">
+                  Ningún caso ha superado el tiempo prometido.
+                </li>
+              )}
+              {rojos.slice(0, 4).map((c) => (
+                <li key={c.id}>
+                  <Link
+                    to="/caso/$casoId"
+                    params={{ casoId: c.id }}
+                    className="group flex items-center gap-3 px-5 py-3 hover:bg-ops-panel/50"
+                  >
+                    <span className="size-2.5 shrink-0 rounded-full bg-sla-red" />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs">
+                        <span className="font-data font-medium">{c.placa}</span>
+                        <span className="text-ops-muted">
+                          {" "}
+                          · {c.ciudad} · {c.tipo_servicio}
+                        </span>
+                      </p>
+                      <p className="text-[10px] text-ops-muted">{c.etapa}</p>
+                    </div>
+                    <span className="shrink-0 font-data text-[11px] text-sla-red">
+                      {minutosTranscurridos(c, ahora)} / {c.prometido_min} min
+                    </span>
+                    <ArrowRight className="size-4 shrink-0 text-ops-muted transition-transform group-hover:translate-x-1" />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            <Link
+              to="/alertas"
+              className="flex items-center justify-between border-t border-ops-line bg-ops-deep/50 px-5 py-3 text-xs font-bold text-brand-sky"
+            >
+              Ver todas las alertas <ArrowRight className="size-4" />
+            </Link>
+          </Panel>
+        </div>
+      </div>
+
+      {/* 4. Mapa de oferta y demanda + capacidad de red */}
+      <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+        <MapaColombia
+          casos={abiertos}
+          ahora={ahora}
+          ciudad={ciudad}
+          onCiudad={(c) => setCiudad(c)}
+          familia={familia}
+          onFamilia={setFamilia}
+        />
+        <CapacidadRed casos={casos} ciudad={ciudad} onCiudad={setCiudad} />
+      </div>
+
+      {/* 5. SLA contra la meta */}
+      <div className="mt-5">
+        <SlaPanel casos={casos} ahora={ahora} />
+      </div>
+
+      {/* 6. Monitor */}
+      <div className="mt-5">
+        <MonitorCasos
+          casos={casos}
+          ahora={ahora}
+          ciudad={ciudad}
+          familia={familia}
+          cargando={isLoading}
+          error={Boolean(error)}
+          onLimpiar={() => elegir(null, null)}
+        />
+      </div>
+    </main>
+  );
+}

@@ -14,8 +14,14 @@ import {
   UserRound,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { CIUDADES, crearCaso, SERVICIOS, type Caso } from "@/lib/casos";
-import { POLIZA, REGIONALES, validarCobertura, type ResultadoCobertura } from "@/lib/flota";
+import { CIUDADES, crearCaso, type Caso } from "@/lib/casos";
+import {
+  POLIZA,
+  REGIONALES,
+  buscarVehiculo,
+  validarCobertura,
+  type ResultadoCobertura,
+} from "@/lib/flota";
 
 export const Route = createFileRoute("/reportar")({
   head: () => ({
@@ -61,10 +67,22 @@ const EJEMPLOS = [
   "Choque leve de la camioneta KJR901 en Medellín, necesito abogado",
   "La tractomula GFT209 no arranca en la Autopista Norte km 21, Bogotá",
   "Se pinchó la llanta de la Kangoo SXM118 en la Av. Boyacá con 13, Bogotá",
+  "Necesito un conductor elegido, estoy en la Zona T de Bogotá con la camioneta BGH256, voy hasta Cedritos",
 ];
 
 // Servicios que implican mover el vehículo: el agente pide el destino.
-const CON_TRASLADO = ["Grúa de gran tonelaje", "Rescate"];
+const CON_TRASLADO = ["Grúa liviana", "Grúa de gran tonelaje", "Rescate", "Conductor elegido"];
+
+const TIEMPO_PROMETIDO: Record<string, number> = {
+  "Grúa de gran tonelaje": 60,
+  "Conductor elegido": 40,
+};
+
+// La grúa depende del tipo de vehículo: pesada para camiones, liviana para el resto.
+function ajustarGrua(servicio: string, tipoVehiculo: string) {
+  if (servicio !== "Grúa liviana" && servicio !== "Grúa de gran tonelaje") return servicio;
+  return tipoVehiculo === "Pesado" ? "Grúa de gran tonelaje" : "Grúa liviana";
+}
 
 function ahoraHora() {
   return new Date().toLocaleTimeString("es-CO", {
@@ -81,26 +99,30 @@ function detectar(texto: string): Deteccion {
 
   const ciudad = CIUDADES.find((c) => t.includes(c.toLowerCase().normalize("NFC"))) ?? "Bogotá";
 
-  let tipo_servicio: string = SERVICIOS[0];
-  if (/abogad|jurídic|juridic|comparendo|tránsito|transito/.test(t))
+  const tipo_vehiculo = /camión|camion|tractomula|mula|pesado|furgón|furgon/.test(t)
+    ? "Pesado"
+    : "Liviano";
+
+  let tipo_servicio = "Grúa liviana";
+  if (/conductor elegido|conductor designado|tom[eé] (unos )?trago|licor|rumba/.test(t))
+    tipo_servicio = "Conductor elegido";
+  else if (/abogad|jurídic|juridic|comparendo|tránsito|transito/.test(t))
     tipo_servicio = "Asistencia jurídica";
   else if (/batería|bateria|llanta|pinch|taller|no enciende/.test(t))
     tipo_servicio = "Carro taller";
   else if (/volc|atasc|rescat|barranco|hundi/.test(t)) tipo_servicio = "Rescate";
   else if (/taxi|hotel|hosped|movilidad|traslado del conductor/.test(t))
     tipo_servicio = "Movilidad del conductor";
-  else if (/camión|camion|tractomula|mula|grúa|grua|pesado|arranca/.test(t))
-    tipo_servicio = "Grúa de gran tonelaje";
+  tipo_servicio = ajustarGrua(tipo_servicio, tipo_vehiculo);
 
-  const causa: Caso["causa"] = /choque|chocó|choco|accident|colisi|atropell|volc/.test(t)
-    ? "Accidente"
-    : "Avería";
+  const causa: Caso["causa"] =
+    tipo_servicio === "Conductor elegido"
+      ? "Solicitud"
+      : /choque|chocó|choco|accident|colisi|atropell|volc/.test(t)
+        ? "Accidente"
+        : "Avería";
 
-  const tipo_vehiculo = /camión|camion|tractomula|mula|pesado|furgón|furgon/.test(t)
-    ? "Pesado"
-    : "Liviano";
-
-  const prometido_min = tipo_servicio === "Grúa de gran tonelaje" ? 60 : 45;
+  const prometido_min = TIEMPO_PROMETIDO[tipo_servicio] ?? 45;
 
   const destinoMatch = texto.match(
     /(?:llevarlo|llevarla|llevar|destino|hasta)\s+(?:a\s+|al\s+)?(.+)$/i,
@@ -170,7 +192,15 @@ function Reportar() {
     }, 650);
   }
 
-  function resumen(d: Deteccion) {
+  function resumen(detectado: Deteccion) {
+    // Si la placa está en la base maestra, el tipo de vehículo manda sobre el texto.
+    const tipoReal = buscarVehiculo(detectado.placa)?.tipo_vehiculo ?? detectado.tipo_vehiculo;
+    const servicio = ajustarGrua(detectado.tipo_servicio, tipoReal);
+    const d = {
+      ...detectado,
+      tipo_servicio: servicio,
+      prometido_min: TIEMPO_PROMETIDO[servicio] ?? 45,
+    };
     const cob = validarCobertura(d.placa, d.tipo_servicio);
     const v = cob.vehiculo;
     const ficha = v

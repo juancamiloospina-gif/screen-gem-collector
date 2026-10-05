@@ -38,13 +38,16 @@ import {
   aprobarCobertura,
   avanzarEtapa,
   casoQuery,
+  ETIQUETA_FAMILIA,
   esAbierto,
+  familiaDe,
   estaInactivo,
   formatoReloj,
   marcarExcepcion,
   minutosEnEtapa,
   minutosTranscurridos,
   notificacionesDe,
+  procesoDe,
   registrarNovedad,
   resolverExcedente,
   semaforo,
@@ -129,6 +132,16 @@ function DetalleCaso() {
     ],
     [Clock3, "Apertura", formatoReloj(caso.creado_en)],
     [Radio, "Canal", caso.origen],
+    [Building2, "Cliente", caso.cliente],
+    [FileText, "Campaña", caso.campana],
+    [Flag, "Proceso", `${procesoDe(caso)} · ${caso.etapa}`],
+    [
+      Truck,
+      "Servicio crítico",
+      familiaDe(caso.tipo_servicio)
+        ? ETIQUETA_FAMILIA[familiaDe(caso.tipo_servicio)!]
+        : "Otro servicio",
+    ],
     [Building2, "Proveedor asignado", caso.proveedor ?? "Pendiente de asignación"],
     [FileText, `Expediente ${POLIZA.aseguradora}`, caso.expediente ?? "Pendiente de radicación"],
   ];

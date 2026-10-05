@@ -13,11 +13,14 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AlertasRouteImport } from './routes/alertas'
 import { Route as AnaliticaRouteImport } from './routes/analitica'
 import { Route as AntesDespuesRouteImport } from './routes/antes-despues'
+import { Route as BackRouteImport } from './routes/back'
 import { Route as CentroRouteImport } from './routes/centro'
 import { Route as CoberturasRouteImport } from './routes/coberturas'
 import { Route as FlotaRouteImport } from './routes/flota'
+import { Route as FrontRouteImport } from './routes/front'
 import { Route as InformesRouteImport } from './routes/informes'
 import { Route as ReportarRouteImport } from './routes/reportar'
+import { Route as SeguimientoRouteImport } from './routes/seguimiento'
 import { Route as SupervisionRouteImport } from './routes/supervision'
 import { Route as CasoCasoIdRouteImport } from './routes/caso.$casoId'
 
@@ -41,6 +44,11 @@ const AntesDespuesRoute = AntesDespuesRouteImport.update({
   path: '/antes-despues',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BackRoute = BackRouteImport.update({
+  id: '/back',
+  path: '/back',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CentroRoute = CentroRouteImport.update({
   id: '/centro',
   path: '/centro',
@@ -56,6 +64,11 @@ const FlotaRoute = FlotaRouteImport.update({
   path: '/flota',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FrontRoute = FrontRouteImport.update({
+  id: '/front',
+  path: '/front',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const InformesRoute = InformesRouteImport.update({
   id: '/informes',
   path: '/informes',
@@ -64,6 +77,11 @@ const InformesRoute = InformesRouteImport.update({
 const ReportarRoute = ReportarRouteImport.update({
   id: '/reportar',
   path: '/reportar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SeguimientoRoute = SeguimientoRouteImport.update({
+  id: '/seguimiento',
+  path: '/seguimiento',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SupervisionRoute = SupervisionRouteImport.update({
@@ -82,11 +100,14 @@ export interface FileRoutesByFullPath {
   '/alertas': typeof AlertasRoute
   '/analitica': typeof AnaliticaRoute
   '/antes-despues': typeof AntesDespuesRoute
+  '/back': typeof BackRoute
   '/centro': typeof CentroRoute
   '/coberturas': typeof CoberturasRoute
   '/flota': typeof FlotaRoute
+  '/front': typeof FrontRoute
   '/informes': typeof InformesRoute
   '/reportar': typeof ReportarRoute
+  '/seguimiento': typeof SeguimientoRoute
   '/supervision': typeof SupervisionRoute
   '/caso/$casoId': typeof CasoCasoIdRoute
 }
@@ -95,11 +116,14 @@ export interface FileRoutesByTo {
   '/alertas': typeof AlertasRoute
   '/analitica': typeof AnaliticaRoute
   '/antes-despues': typeof AntesDespuesRoute
+  '/back': typeof BackRoute
   '/centro': typeof CentroRoute
   '/coberturas': typeof CoberturasRoute
   '/flota': typeof FlotaRoute
+  '/front': typeof FrontRoute
   '/informes': typeof InformesRoute
   '/reportar': typeof ReportarRoute
+  '/seguimiento': typeof SeguimientoRoute
   '/supervision': typeof SupervisionRoute
   '/caso/$casoId': typeof CasoCasoIdRoute
 }
@@ -109,11 +133,14 @@ export interface FileRoutesById {
   '/alertas': typeof AlertasRoute
   '/analitica': typeof AnaliticaRoute
   '/antes-despues': typeof AntesDespuesRoute
+  '/back': typeof BackRoute
   '/centro': typeof CentroRoute
   '/coberturas': typeof CoberturasRoute
   '/flota': typeof FlotaRoute
+  '/front': typeof FrontRoute
   '/informes': typeof InformesRoute
   '/reportar': typeof ReportarRoute
+  '/seguimiento': typeof SeguimientoRoute
   '/supervision': typeof SupervisionRoute
   '/caso/$casoId': typeof CasoCasoIdRoute
 }
@@ -124,11 +151,14 @@ export interface FileRouteTypes {
     | '/alertas'
     | '/analitica'
     | '/antes-despues'
+    | '/back'
     | '/centro'
     | '/coberturas'
     | '/flota'
+    | '/front'
     | '/informes'
     | '/reportar'
+    | '/seguimiento'
     | '/supervision'
     | '/caso/$casoId'
   fileRoutesByTo: FileRoutesByTo
@@ -137,11 +167,14 @@ export interface FileRouteTypes {
     | '/alertas'
     | '/analitica'
     | '/antes-despues'
+    | '/back'
     | '/centro'
     | '/coberturas'
     | '/flota'
+    | '/front'
     | '/informes'
     | '/reportar'
+    | '/seguimiento'
     | '/supervision'
     | '/caso/$casoId'
   id:
@@ -150,11 +183,14 @@ export interface FileRouteTypes {
     | '/alertas'
     | '/analitica'
     | '/antes-despues'
+    | '/back'
     | '/centro'
     | '/coberturas'
     | '/flota'
+    | '/front'
     | '/informes'
     | '/reportar'
+    | '/seguimiento'
     | '/supervision'
     | '/caso/$casoId'
   fileRoutesById: FileRoutesById
@@ -164,11 +200,14 @@ export interface RootRouteChildren {
   AlertasRoute: typeof AlertasRoute
   AnaliticaRoute: typeof AnaliticaRoute
   AntesDespuesRoute: typeof AntesDespuesRoute
+  BackRoute: typeof BackRoute
   CentroRoute: typeof CentroRoute
   CoberturasRoute: typeof CoberturasRoute
   FlotaRoute: typeof FlotaRoute
+  FrontRoute: typeof FrontRoute
   InformesRoute: typeof InformesRoute
   ReportarRoute: typeof ReportarRoute
+  SeguimientoRoute: typeof SeguimientoRoute
   SupervisionRoute: typeof SupervisionRoute
   CasoCasoIdRoute: typeof CasoCasoIdRoute
 }
@@ -203,6 +242,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AntesDespuesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/back': {
+      id: '/back'
+      path: '/back'
+      fullPath: '/back'
+      preLoaderRoute: typeof BackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/centro': {
       id: '/centro'
       path: '/centro'
@@ -224,6 +270,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FlotaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/front': {
+      id: '/front'
+      path: '/front'
+      fullPath: '/front'
+      preLoaderRoute: typeof FrontRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/informes': {
       id: '/informes'
       path: '/informes'
@@ -236,6 +289,13 @@ declare module '@tanstack/react-router' {
       path: '/reportar'
       fullPath: '/reportar'
       preLoaderRoute: typeof ReportarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/seguimiento': {
+      id: '/seguimiento'
+      path: '/seguimiento'
+      fullPath: '/seguimiento'
+      preLoaderRoute: typeof SeguimientoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/supervision': {
@@ -260,11 +320,14 @@ const rootRouteChildren: RootRouteChildren = {
   AlertasRoute: AlertasRoute,
   AnaliticaRoute: AnaliticaRoute,
   AntesDespuesRoute: AntesDespuesRoute,
+  BackRoute: BackRoute,
   CentroRoute: CentroRoute,
   CoberturasRoute: CoberturasRoute,
   FlotaRoute: FlotaRoute,
+  FrontRoute: FrontRoute,
   InformesRoute: InformesRoute,
   ReportarRoute: ReportarRoute,
+  SeguimientoRoute: SeguimientoRoute,
   SupervisionRoute: SupervisionRoute,
   CasoCasoIdRoute: CasoCasoIdRoute,
 }

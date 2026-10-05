@@ -1,13 +1,32 @@
 import { lazy, Suspense, useEffect, useState } from "react";
-import type { Caso } from "@/lib/casos";
+import { ETIQUETA_FAMILIA, type Caso, type Familia } from "@/lib/casos";
 import { CIUDAD_LATLON } from "@/lib/geo";
+import type { CapasMapa } from "./MapaLeaflet";
 
 // Leaflet usa `window`: se importa solo en el navegador, después de hidratar.
 const MapaLeaflet = lazy(() => import("./MapaLeaflet"));
 
-export function MapaColombia({ casos, ahora }: { casos: Caso[]; ahora: number }) {
+export function MapaColombia({
+  casos,
+  ahora,
+  ciudad,
+  onCiudad,
+  familia = null,
+  onFamilia,
+  capasIniciales = { casos: true, red: true },
+  alto = "min-h-[600px] xl:min-h-[650px]",
+}: {
+  casos: Caso[];
+  ahora: number;
+  ciudad: string | null;
+  onCiudad: (c: string | null) => void;
+  familia?: Familia | null;
+  onFamilia?: (f: Familia | null) => void;
+  capasIniciales?: CapasMapa;
+  alto?: string;
+}) {
   const [enCliente, setEnCliente] = useState(false);
-  const [ciudad, setCiudad] = useState<string | null>(null);
+  const [capas, setCapas] = useState<CapasMapa>(capasIniciales);
   useEffect(() => setEnCliente(true), []);
   const porCiudad = (c: string) => casos.filter((x) => x.ciudad === c).length;
   const cargando = (
@@ -24,41 +43,87 @@ export function MapaColombia({ casos, ahora }: { casos: Caso[]; ahora: number })
     }`;
 
   return (
-    <section className="flex min-h-[600px] flex-col overflow-hidden rounded-xl border border-ops-line bg-ops-navy shadow-2xl xl:min-h-[650px]">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-ops-line px-5 py-4">
-        <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-brand-sky">
-            Mapa operativo
-          </p>
-          <p className="mt-1 font-display text-lg font-semibold">Colombia en vivo</p>
+    <section
+      className={`flex flex-col overflow-hidden rounded-xl border border-ops-line bg-ops-navy shadow-2xl ${alto}`}
+    >
+      <div className="space-y-3 border-b border-ops-line px-5 py-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-brand-sky">
+              Mapa operativo
+            </p>
+            <p className="mt-1 font-display text-lg font-semibold">Oferta y demanda en vivo</p>
+          </div>
+          <div className="flex gap-1.5" role="group" aria-label="Capas del mapa">
+            <button
+              type="button"
+              aria-pressed={capas.casos}
+              onClick={() => setCapas((c) => ({ ...c, casos: !c.casos }))}
+              className={chip(capas.casos)}
+            >
+              Casos (demanda)
+            </button>
+            <button
+              type="button"
+              aria-pressed={capas.red}
+              onClick={() => setCapas((c) => ({ ...c, red: !c.red }))}
+              className={chip(capas.red)}
+            >
+              Red de proveedores (oferta)
+            </button>
+          </div>
         </div>
         <div className="flex flex-wrap gap-1.5" role="group" aria-label="Ver casos por ciudad">
-          <button type="button" onClick={() => setCiudad(null)} className={chip(ciudad === null)}>
+          <button type="button" onClick={() => onCiudad(null)} className={chip(ciudad === null)}>
             Todo el país · {casos.length}
           </button>
           {Object.keys(CIUDAD_LATLON).map((c) => (
             <button
               key={c}
               type="button"
-              onClick={() => setCiudad(c)}
+              onClick={() => onCiudad(c)}
               className={chip(ciudad === c)}
             >
               {c} · {porCiudad(c)}
             </button>
           ))}
         </div>
+        {familia && (
+          <p className="flex items-center gap-2 text-[10px] text-ops-muted">
+            Filtrando por{" "}
+            <span className="font-bold text-ops-ink">{ETIQUETA_FAMILIA[familia]}</span>
+            {onFamilia && (
+              <button
+                type="button"
+                onClick={() => onFamilia(null)}
+                className="text-brand-sky underline"
+              >
+                Quitar filtro
+              </button>
+            )}
+          </p>
+        )}
       </div>
 
-      <div className="relative isolate flex-1">
+      <div className="relative isolate min-h-[520px] flex-1">
         {enCliente ? (
           <Suspense fallback={cargando}>
-            <MapaLeaflet casos={casos} ahora={ahora} ciudad={ciudad} setCiudad={setCiudad} />
+            <MapaLeaflet
+              casos={casos}
+              ahora={ahora}
+              ciudad={ciudad}
+              setCiudad={onCiudad}
+              familia={familia}
+              capas={capas}
+            />
           </Suspense>
         ) : (
           cargando
         )}
-        <div className="pointer-events-none absolute bottom-6 left-4 z-[500] flex flex-wrap gap-4 rounded-lg border border-ops-line bg-ops-deep/90 px-4 py-3 text-[10px] text-ops-muted backdrop-blur">
-          {[
+      </div>
+      <div className="flex flex-wrap gap-x-4 gap-y-1.5 border-t border-ops-line bg-ops-deep/60 px-5 py-3 text-[10px] text-ops-muted">
+        {capas.casos &&
+          [
             ["bg-sla-green", "En tiempo"],
             ["bg-sla-amber", "En riesgo"],
             ["bg-sla-red", "Incumplido"],
@@ -68,7 +133,20 @@ export function MapaColombia({ casos, ahora }: { casos: Caso[]; ahora: number })
               {l}
             </span>
           ))}
-        </div>
+        {capas.red && (
+          <>
+            <span className="flex items-center gap-2">
+              <span className="size-2 rounded-sm bg-brand-sky" /> Proveedor disponible
+            </span>
+            <span className="flex items-center gap-2">
+              <span className="size-2 rounded-sm bg-ops-muted" /> Ocupado
+            </span>
+            <span className="flex items-center gap-2">
+              <span className="size-2 rounded-sm border border-dashed border-ops-muted" /> Fuera de
+              zona
+            </span>
+          </>
+        )}
       </div>
     </section>
   );

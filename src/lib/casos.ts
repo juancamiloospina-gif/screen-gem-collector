@@ -27,11 +27,13 @@ export const ETAPAS = [
 export type Etapa = (typeof ETAPAS)[number];
 
 export const SERVICIOS = [
+  "Grúa liviana",
   "Grúa de gran tonelaje",
   "Rescate",
   "Asistencia jurídica",
   "Carro taller",
   "Movilidad del conductor",
+  "Conductor elegido",
 ] as const;
 
 export const CIUDADES = ["Bogotá", "Medellín", "Barranquilla", "Cali", "Neiva"] as const;
@@ -72,7 +74,9 @@ export type Caso = {
   numero: number;
   placa: string;
   tipo_servicio: string;
-  causa: "Avería" | "Accidente";
+  causa: "Avería" | "Accidente" | "Solicitud";
+  cliente: string;
+  campana: string;
   ciudad: string;
   ubicacion: string;
   destino: string | null;
@@ -107,6 +111,52 @@ export type EventoCaso = {
 export type Semaforo = "verde" | "amarillo" | "rojo";
 
 export const CERRADAS: Etapa[] = ["Finalizado", "Cierre"];
+
+// Servicios críticos que se monitorean por ciudad: ahí está el dolor.
+export const FAMILIAS = ["Grúa liviana", "Grúa pesada", "Carro taller", "CE"] as const;
+export type Familia = (typeof FAMILIAS)[number];
+
+export const ETIQUETA_FAMILIA: Record<Familia, string> = {
+  "Grúa liviana": "Grúa liviana",
+  "Grúa pesada": "Grúa pesada",
+  "Carro taller": "Carro taller",
+  CE: "Conductor elegido",
+};
+
+export function familiaDe(tipo_servicio: string): Familia | null {
+  switch (tipo_servicio) {
+    case "Grúa liviana":
+      return "Grúa liviana";
+    case "Grúa de gran tonelaje":
+      return "Grúa pesada";
+    case "Carro taller":
+      return "Carro taller";
+    case "Conductor elegido":
+      return "CE";
+    default:
+      return null;
+  }
+}
+
+// Los tres procesos críticos del servicio. Front toma y valida; Back radica
+// y asigna proveedor; Seguimiento acompaña desde la llegada hasta el cierre.
+export const PROCESOS = ["Front", "Back", "Seguimiento"] as const;
+export type Proceso = (typeof PROCESOS)[number];
+
+export const PROCESO_DE_ETAPA: Record<Etapa, Proceso> = {
+  Creación: "Front",
+  Trámite: "Back",
+  Asignado: "Back",
+  "Llegada a sitio": "Seguimiento",
+  "En atención": "Seguimiento",
+  Traslado: "Seguimiento",
+  Finalizado: "Seguimiento",
+  Cierre: "Seguimiento",
+};
+
+export function procesoDe(caso: Pick<Caso, "etapa">): Proceso {
+  return PROCESO_DE_ETAPA[caso.etapa];
+}
 
 export function minutosTranscurridos(caso: Caso, ahora: number = Date.now()) {
   return Math.max(0, Math.round((ahora - new Date(caso.creado_en).getTime()) / 60000));
@@ -166,6 +216,40 @@ export function minutosEnEtapa(caso: Caso, ahora: number = Date.now()) {
 
 export function estaInactivo(caso: Caso, ahora: number = Date.now()) {
   return esAbierto(caso) && minutosEnEtapa(caso, ahora) > TIEMPO_ESPERADO_ETAPA[caso.etapa];
+}
+
+// --- Predictivo: casos por vencerse -------------------------------------
+
+export const VENTANA_PREDICTIVA_MIN = 10;
+
+export function minutosRestantes(caso: Caso, ahora: number = Date.now()) {
+  return caso.prometido_min - minutosTranscurridos(caso, ahora);
+}
+
+export type Vencimiento = { minutos: number; motivo: "SLA" | "Etapa" };
+
+// Lo próximo que se vence: el tiempo prometido al cliente (SLA) o el tiempo
+// esperado de la etapa actual. Los casos que ya incumplieron no son
+// predictivos: son críticos.
+export function porVencer(
+  caso: Caso,
+  ahora: number = Date.now(),
+  ventana: number = VENTANA_PREDICTIVA_MIN,
+): Vencimiento | null {
+  if (!esAbierto(caso) || semaforo(caso, ahora) === "rojo") return null;
+  const candidatos: Vencimiento[] = [];
+  const sla = minutosRestantes(caso, ahora);
+  if (sla > 0) candidatos.push({ minutos: sla, motivo: "SLA" });
+  const limiteEtapa = TIEMPO_ESPERADO_ETAPA[caso.etapa];
+  if (Number.isFinite(limiteEtapa)) {
+    const etapa = limiteEtapa - minutosEnEtapa(caso, ahora);
+    if (etapa > 0) candidatos.push({ minutos: etapa, motivo: "Etapa" });
+  }
+  const proximo = candidatos.reduce<Vencimiento | null>(
+    (a, b) => (a === null || b.minutos < a.minutos ? b : a),
+    null,
+  );
+  return proximo && proximo.minutos <= ventana ? proximo : null;
 }
 
 // --- Matriz de comunicación (§4.2) -------------------------------------
@@ -282,6 +366,8 @@ const PROVEEDOR_CIUDAD: Record<string, string> = {
 function proveedorPara(tipo_servicio: string, ciudad: string) {
   if (tipo_servicio === "Asistencia jurídica") return "Abogados en Vía S.A.S.";
   if (tipo_servicio === "Movilidad del conductor") return "Transporte Seguro Mapfre";
+  if (tipo_servicio === "Conductor elegido") return "Conductor Elegido Express";
+  if (tipo_servicio === "Grúa liviana") return `Grúas Express ${ciudad}`;
   return PROVEEDOR_CIUDAD[ciudad] ?? "Red de proveedores Mapfre";
 }
 
@@ -569,6 +655,114 @@ const CASOS_SEMILLA: CasoSemilla[] = [
       },
     ],
   },
+  {
+    placa: "FCT-482",
+    tipo_servicio: "Grúa liviana",
+    causa: "Avería",
+    ciudad: "Medellín",
+    ubicacion: "Av. Las Vegas con Calle 10",
+    destino: "Taller Mazda, El Poblado",
+    km_traslado: 9,
+    tipo_vehiculo: "Liviano",
+    etapa: "Trámite",
+    prometido_min: 45,
+    minutosOriginales: 20,
+    minutosSinCambio: 6,
+    mapa_x: 33,
+    mapa_y: 27,
+  },
+  {
+    placa: "NRW-317",
+    tipo_servicio: "Grúa liviana",
+    causa: "Accidente",
+    ciudad: "Cali",
+    ubicacion: "Calle 5 con Cra 66",
+    destino: "Taller Kia, Av. Roosevelt",
+    km_traslado: 11,
+    tipo_vehiculo: "Liviano",
+    etapa: "Asignado",
+    prometido_min: 45,
+    minutosOriginales: 38,
+    minutosSinCambio: 12,
+    mapa_x: 30,
+    mapa_y: 59,
+  },
+  {
+    placa: "BGH-256",
+    tipo_servicio: "Conductor elegido",
+    causa: "Solicitud",
+    ciudad: "Bogotá",
+    ubicacion: "Zona T, Calle 82 con Cra 12",
+    destino: "Conjunto Cedritos, Calle 140",
+    km_traslado: 14,
+    tipo_vehiculo: "Liviano",
+    etapa: "Creación",
+    prometido_min: 40,
+    minutosOriginales: 3,
+    mapa_x: 39,
+    mapa_y: 35,
+  },
+  {
+    placa: "ZPL-904",
+    tipo_servicio: "Conductor elegido",
+    causa: "Solicitud",
+    ciudad: "Medellín",
+    ubicacion: "Parque Lleras, El Poblado",
+    destino: "Laureles, Cra 70",
+    km_traslado: 7,
+    tipo_vehiculo: "Liviano",
+    etapa: "Asignado",
+    prometido_min: 40,
+    minutosOriginales: 36,
+    minutosSinCambio: 14,
+    mapa_x: 34,
+    mapa_y: 26,
+  },
+  {
+    placa: "CMV-662",
+    tipo_servicio: "Grúa de gran tonelaje",
+    causa: "Avería",
+    ciudad: "Barranquilla",
+    ubicacion: "Vía 40 km 5, zona industrial",
+    destino: "Taller Kenworth, Malambo",
+    km_traslado: 22,
+    tipo_vehiculo: "Pesado",
+    etapa: "Trámite",
+    prometido_min: 60,
+    minutosOriginales: 19,
+    minutosSinCambio: 9,
+    mapa_x: 41,
+    mapa_y: 13,
+  },
+  {
+    placa: "TQW-571",
+    tipo_servicio: "Carro taller",
+    causa: "Avería",
+    ciudad: "Bogotá",
+    ubicacion: "Calle 100 con Autopista Norte",
+    tipo_vehiculo: "Liviano",
+    etapa: "Llegada a sitio",
+    prometido_min: 45,
+    minutosOriginales: 30,
+    mapa_x: 40,
+    mapa_y: 33,
+  },
+  {
+    placa: "RHD-308",
+    tipo_servicio: "Grúa liviana",
+    causa: "Avería",
+    ciudad: "Neiva",
+    ubicacion: "Carrera 5 con Calle 21",
+    destino: "Taller Nissan, Neiva",
+    km_traslado: 6,
+    tipo_vehiculo: "Liviano",
+    etapa: "Asignado",
+    prometido_min: 45,
+    minutosOriginales: 20,
+    minutosSinCambio: 8,
+    mapa_x: 36,
+    mapa_y: 67,
+  },
 ];
 
 const NUMERO_INICIAL = 1040;
@@ -580,13 +774,22 @@ function expedientePara(numero: number) {
 function nuevoInterno(
   base: Omit<
     CasoInterno,
-    "proveedor" | "expediente" | "cobertura" | "atendido_por" | "cambiosFijos" | "novedadesFijas"
+    | "proveedor"
+    | "expediente"
+    | "cobertura"
+    | "atendido_por"
+    | "cambiosFijos"
+    | "novedadesFijas"
+    | "cliente"
+    | "campana"
   > & { motivo_traspaso: string | null },
 ): CasoInterno {
   const cob = validarCobertura(base.placa, base.tipo_servicio);
   const ord = ETAPAS.indexOf(base.etapa);
   return {
     ...base,
+    cliente: cob.vehiculo?.cliente ?? "Sin cliente",
+    campana: cob.vehiculo?.campana ?? "Sin campaña",
     cobertura: cob.estado,
     proveedor:
       ord >= ETAPAS.indexOf("Asignado") ? proveedorPara(base.tipo_servicio, base.ciudad) : null,

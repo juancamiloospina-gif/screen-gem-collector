@@ -17,6 +17,10 @@ export type Vehiculo = {
   conductor: string;
   telefono_conductor: string;
   jefe_inmediato: string;
+  // Cuenta a la que pertenece el vehículo (SLA por cliente y campaña).
+  // Nombres ficticios: se ajustan cuando INDEGA confirme la segmentación.
+  cliente: string;
+  campana: string;
   // false = la placa opera pero no está en la cartera asegurada (hallazgo
   // del diagnóstico: 32 placas atendidas por fuera de cartera).
   en_cartera: boolean;
@@ -43,17 +47,25 @@ export const COBERTURA_POR_TIPO: Record<
       "Asistencia jurídica",
       "Carro taller",
       "Movilidad del conductor",
+      "Conductor elegido",
     ],
   },
   Liviano: {
     tope_km: 40,
     eventos_anio: 5,
-    servicios: ["Rescate", "Asistencia jurídica", "Carro taller", "Movilidad del conductor"],
+    servicios: [
+      "Grúa liviana",
+      "Rescate",
+      "Asistencia jurídica",
+      "Carro taller",
+      "Movilidad del conductor",
+      "Conductor elegido",
+    ],
   },
   Moto: {
     tope_km: 25,
     eventos_anio: 4,
-    servicios: ["Asistencia jurídica", "Movilidad del conductor"],
+    servicios: ["Grúa liviana", "Asistencia jurídica", "Movilidad del conductor"],
   },
 };
 
@@ -72,7 +84,7 @@ export const REGIONALES: Record<Regional, { ciudad: string; director: string; co
 export const DIRECTOR_FLOTA = { nombre: "Director de Flota", correo: "director.flota@indega.demo" };
 export const HSE = { nombre: "Coordinación HSE y seguridad vial", correo: "hse@indega.demo" };
 
-export const FLOTA: Vehiculo[] = [
+const FLOTA_BASE: Omit<Vehiculo, "cliente" | "campana">[] = [
   {
     placa: "WTX-234",
     tipo_vehiculo: "Pesado",
@@ -326,7 +338,149 @@ export const FLOTA: Vehiculo[] = [
     jefe_inmediato: "Liliana Trujillo",
     en_cartera: true,
   },
+  {
+    placa: "FCT-482",
+    tipo_vehiculo: "Liviano",
+    marca: "Mazda",
+    linea: "CX-30",
+    modelo: 2023,
+    regional: "Antioquia",
+    sede: "CEDI Itagüí",
+    centro_costo: "VEN-ANT-03",
+    conductor: "Mateo Giraldo",
+    telefono_conductor: "311 555 0190",
+    jefe_inmediato: "Paula Gómez",
+    en_cartera: true,
+  },
+  {
+    placa: "NRW-317",
+    tipo_vehiculo: "Liviano",
+    marca: "Kia",
+    linea: "Sportage",
+    modelo: 2022,
+    regional: "Pacífico",
+    sede: "Planta Yumbo",
+    centro_costo: "SUP-PAC-02",
+    conductor: "Daniela Ortiz",
+    telefono_conductor: "316 555 0121",
+    jefe_inmediato: "Natalia Cruz",
+    en_cartera: true,
+  },
+  {
+    placa: "BGH-256",
+    tipo_vehiculo: "Liviano",
+    marca: "Chevrolet",
+    linea: "Tracker",
+    modelo: 2024,
+    regional: "Centro",
+    sede: "CEDI Fontibón",
+    centro_costo: "VEN-CEN-04",
+    conductor: "Camila Duarte",
+    telefono_conductor: "312 555 0176",
+    jefe_inmediato: "Mauricio Téllez",
+    en_cartera: true,
+  },
+  {
+    placa: "ZPL-904",
+    tipo_vehiculo: "Liviano",
+    marca: "Renault",
+    linea: "Sandero",
+    modelo: 2021,
+    regional: "Antioquia",
+    sede: "CEDI Rionegro",
+    centro_costo: "VEN-ANT-01",
+    conductor: "Esteban Cano",
+    telefono_conductor: "314 555 0133",
+    jefe_inmediato: "Paula Gómez",
+    en_cartera: true,
+  },
+  {
+    placa: "CMV-662",
+    tipo_vehiculo: "Pesado",
+    marca: "Kenworth",
+    linea: "T370",
+    modelo: 2020,
+    regional: "Caribe",
+    sede: "CEDI Barranquilla",
+    centro_costo: "DIST-CAR-01",
+    conductor: "Orlando Peña",
+    telefono_conductor: "300 555 0148",
+    jefe_inmediato: "Kelly Charris",
+    en_cartera: true,
+  },
+  {
+    placa: "TQW-571",
+    tipo_vehiculo: "Liviano",
+    marca: "Toyota",
+    linea: "Hilux",
+    modelo: 2023,
+    regional: "Centro",
+    sede: "CEDI Fontibón",
+    centro_costo: "SUP-CEN-03",
+    conductor: "Julián Arévalo",
+    telefono_conductor: "313 555 0185",
+    jefe_inmediato: "Mauricio Téllez",
+    en_cartera: true,
+  },
+  {
+    placa: "RHD-308",
+    tipo_vehiculo: "Liviano",
+    marca: "Nissan",
+    linea: "Kicks",
+    modelo: 2022,
+    regional: "Sur",
+    sede: "CEDI Neiva",
+    centro_costo: "VEN-SUR-02",
+    conductor: "Paola Medina",
+    telefono_conductor: "317 555 0119",
+    jefe_inmediato: "Liliana Trujillo",
+    en_cartera: true,
+  },
 ];
+
+// Cuentas ficticias (B2C): cada cliente tiene campañas con su propia meta de SLA.
+export const CLIENTES = {
+  "Aseguradora Andina": ["Todo Riesgo Plus", "Básico Asistencia"],
+  "Seguros del Pacífico": ["SOAT + Asistencia", "Plan Familiar"],
+  "Banco Cordillera": ["Tarjeta Gold", "Crédito Vehicular"],
+  "Autos Fénix": ["Garantía Extendida", "Renting Personas"],
+} as const;
+
+const CUENTA_POR_PLACA: Record<string, [string, string]> = {
+  "WTX-234": ["Aseguradora Andina", "Todo Riesgo Plus"],
+  "KJR-901": ["Aseguradora Andina", "Todo Riesgo Plus"],
+  "LKP-219": ["Aseguradora Andina", "Todo Riesgo Plus"],
+  "GFT-209": ["Aseguradora Andina", "Básico Asistencia"],
+  "DRC-330": ["Aseguradora Andina", "Básico Asistencia"],
+  "CMV-662": ["Aseguradora Andina", "Básico Asistencia"],
+  "PLM-558": ["Seguros del Pacífico", "SOAT + Asistencia"],
+  "RDF-405": ["Seguros del Pacífico", "SOAT + Asistencia"],
+  "NRW-317": ["Seguros del Pacífico", "SOAT + Asistencia"],
+  "HQN-402": ["Seguros del Pacífico", "Plan Familiar"],
+  "TNP-673": ["Seguros del Pacífico", "Plan Familiar"],
+  "RHD-308": ["Seguros del Pacífico", "Plan Familiar"],
+  "ZVC-117": ["Banco Cordillera", "Tarjeta Gold"],
+  "QRT-884": ["Banco Cordillera", "Tarjeta Gold"],
+  "FCT-482": ["Banco Cordillera", "Tarjeta Gold"],
+  "VBN-615": ["Banco Cordillera", "Crédito Vehicular"],
+  "FWL-730": ["Banco Cordillera", "Crédito Vehicular"],
+  "BTR-776": ["Autos Fénix", "Garantía Extendida"],
+  "SXM-118": ["Autos Fénix", "Garantía Extendida"],
+  "BGH-256": ["Autos Fénix", "Garantía Extendida"],
+  "TQW-571": ["Autos Fénix", "Garantía Extendida"],
+  "MZN-341": ["Autos Fénix", "Renting Personas"],
+  "JHK-552": ["Autos Fénix", "Renting Personas"],
+  "MOT-45F": ["Autos Fénix", "Renting Personas"],
+  "ZPL-904": ["Autos Fénix", "Renting Personas"],
+};
+
+export const FLOTA: Vehiculo[] = FLOTA_BASE.map((v) => {
+  const [cliente, campana] = CUENTA_POR_PLACA[v.placa] ?? [
+    "Aseguradora Andina",
+    "Básico Asistencia",
+  ];
+  return { ...v, cliente, campana };
+});
 
 export function buscarVehiculo(placa: string): Vehiculo | undefined {
   const p = placa.toUpperCase().replace(/[\s-]/g, "");

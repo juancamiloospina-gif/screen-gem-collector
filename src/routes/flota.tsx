@@ -32,8 +32,8 @@ function Flota() {
     (v) =>
       (!soloFuera || !v.en_cartera) &&
       (!f ||
-        [v.placa, v.conductor, v.marca, v.linea, v.regional, v.sede].some((x) =>
-          x.toLowerCase().includes(f),
+        [v.placa, v.conductor, v.marca, v.linea, v.regional, v.sede, v.cliente, v.campana].some(
+          (x) => x.toLowerCase().includes(f),
         )),
   );
   const fuera = FLOTA.filter((v) => !v.en_cartera).length;
@@ -94,7 +94,7 @@ function Flota() {
           </div>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[980px] text-left text-[11px]">
+          <table className="w-full min-w-[1100px] text-left text-[11px]">
             <thead className="bg-ops-deep/50 text-[9px] uppercase tracking-[0.12em] text-ops-muted">
               <tr>
                 {[
@@ -103,6 +103,7 @@ function Flota() {
                   "Regional · sede",
                   "Centro de costo",
                   "Conductor",
+                  "Cliente · campaña",
                   "Responsables a notificar",
                   "Cobertura",
                   "Eventos 12m",
@@ -133,6 +134,10 @@ function Flota() {
                     <td className="px-4 py-3">
                       {v.conductor}
                       <p className="font-data text-[10px] text-ops-muted">{v.telefono_conductor}</p>
+                    </td>
+                    <td className="px-4 py-3">
+                      {v.cliente}
+                      <p className="text-[10px] text-ops-muted">{v.campana}</p>
                     </td>
                     <td className="px-4 py-3 text-ops-muted">
                       {v.jefe_inmediato} (jefe inmediato)
