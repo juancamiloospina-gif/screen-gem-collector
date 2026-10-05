@@ -14,7 +14,7 @@ export function Encabezado({
   children?: ReactNode;
 }) {
   return (
-    <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+    <div data-tour="encabezado" className="mb-6 flex flex-wrap items-end justify-between gap-4">
       <div>
         <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-brand-sky">
           {eyebrow}
@@ -33,15 +33,19 @@ export function Panel({
   accion,
   children,
   className = "",
+  tour,
 }: {
   titulo?: string;
   eyebrow?: string;
   accion?: ReactNode;
   children: ReactNode;
   className?: string;
+  // Identifica el panel en el recorrido guiado.
+  tour?: string;
 }) {
   return (
     <section
+      data-tour={tour}
       className={`overflow-hidden rounded-xl border border-ops-line bg-ops-navy ${className}`}
     >
       {(titulo || eyebrow) && (

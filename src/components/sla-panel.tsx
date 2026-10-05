@@ -108,6 +108,7 @@ export function SlaPanel({
 
   return (
     <Panel
+      tour="sla"
       eyebrow="SLA contra la meta"
       titulo="Cumplimiento del tiempo prometido"
       accion={

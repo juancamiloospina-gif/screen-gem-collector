@@ -68,6 +68,7 @@ function Flota() {
 
       <Panel
         className="mt-5"
+        tour="tabla"
         eyebrow="Vehículos"
         titulo={`${filas.length} de ${FLOTA.length} vehículos`}
         accion={

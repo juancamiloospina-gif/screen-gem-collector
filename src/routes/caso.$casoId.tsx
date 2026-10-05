@@ -210,7 +210,10 @@ function DetalleCaso() {
 
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1.4fr)_380px]">
         <div className="min-w-0 space-y-5">
-          <section className="overflow-hidden rounded-xl border border-ops-line bg-ops-navy">
+          <section
+            data-tour="cronologia"
+            className="overflow-hidden rounded-xl border border-ops-line bg-ops-navy"
+          >
             <div className="grid gap-px bg-ops-line sm:grid-cols-2 lg:grid-cols-4">
               {datos.map(([Icon, l, v]) => (
                 <div key={l} className="bg-ops-navy p-4">
@@ -332,7 +335,10 @@ function DetalleCaso() {
               </ol>
             </section>
 
-            <section className="rounded-xl border border-ops-line bg-ops-navy">
+            <section
+              data-tour="notificaciones"
+              className="rounded-xl border border-ops-line bg-ops-navy"
+            >
               <div className="flex items-center justify-between border-b border-ops-line px-5 py-4">
                 <div>
                   <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-brand-sky">
@@ -387,7 +393,7 @@ function DetalleCaso() {
             </div>
           </div>
 
-          <div className="rounded-xl border border-ops-line bg-ops-navy p-5">
+          <div data-tour="cobertura" className="rounded-xl border border-ops-line bg-ops-navy p-5">
             <div className="flex items-center justify-between">
               <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-brand-sky">
                 Cobertura
@@ -422,7 +428,7 @@ function DetalleCaso() {
             </dl>
           </div>
 
-          <div className="rounded-xl border border-ops-line bg-ops-navy">
+          <div data-tour="excedentes" className="rounded-xl border border-ops-line bg-ops-navy">
             <div className="border-b border-ops-line px-5 py-4">
               <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-brand-sky">
                 Excedentes
@@ -530,7 +536,11 @@ function DetalleCaso() {
               </div>
             </div>
           </div>
-          <Button className="h-11 w-full rounded-lg font-bold" onClick={() => setDialogo(true)}>
+          <Button
+            data-tour="actualizar"
+            className="h-11 w-full rounded-lg font-bold"
+            onClick={() => setDialogo(true)}
+          >
             Registrar actualización
           </Button>
         </aside>

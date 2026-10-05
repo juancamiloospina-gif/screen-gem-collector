@@ -131,7 +131,10 @@ export function MonitorCasos({
   );
   const hayFiltro = Boolean(ciudad || familia);
   return (
-    <section className="overflow-hidden rounded-xl border border-ops-line bg-ops-navy">
+    <section
+      data-tour="monitor"
+      className="overflow-hidden rounded-xl border border-ops-line bg-ops-navy"
+    >
       <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-4">
         <div>
           <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-brand-sky">

@@ -19,6 +19,7 @@ import {
   Truck,
 } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
+import { BotonGuia, RecorridoProvider } from "@/components/recorrido";
 import { Button } from "@/components/ui/button";
 import { casosQuery } from "@/lib/casos";
 import { FLOTA } from "@/lib/flota";
@@ -120,6 +121,7 @@ function Buscador() {
   };
   return (
     <form
+      data-tour="buscador"
       className="relative ml-auto hidden w-full max-w-xs lg:block"
       onSubmit={(e) => {
         e.preventDefault();
@@ -240,6 +242,7 @@ function MobileMenu() {
         size="icon"
         className="text-ops-muted md:hidden"
         aria-label="Abrir navegación"
+        data-tour="menu"
       >
         <PanelLeft />
       </Button>
@@ -277,62 +280,68 @@ export function AppShell({ children }: { children: ReactNode }) {
   const path = useRouterState({ select: (s) => s.location.pathname });
   if (path === "/") return children;
   return (
-    <div className="flex min-h-screen bg-ops-deep text-ops-ink">
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-ops-line bg-ops-navy md:flex">
-        <div className="px-6 py-7">
-          <Marca />
-        </div>
-        <nav className="flex-1 overflow-y-auto px-3">
-          <EnlacesNav denso />
-        </nav>
-        <div className="m-4 rounded-lg border border-ops-line bg-ops-panel/60 p-3">
-          <div className="flex items-center gap-3">
-            <div className="grid size-9 place-items-center rounded-lg bg-brand-blue font-display text-xs font-bold">
-              DF
-            </div>
-            <div>
-              <p className="text-xs font-bold">Director de Flota</p>
-              <p className="text-[10px] text-ops-muted">Sesión de demostración</p>
-            </div>
+    <RecorridoProvider>
+      <div className="flex min-h-screen bg-ops-deep text-ops-ink">
+        <aside
+          data-tour="menu"
+          className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-ops-line bg-ops-navy md:flex"
+        >
+          <div className="px-6 py-7">
+            <Marca />
           </div>
-          <Link
-            to="/"
-            className="mt-3 flex items-center gap-2 border-t border-ops-line pt-3 text-xs text-ops-muted hover:text-ops-ink"
-          >
-            <LogOut className="size-4" /> Salir del centro
-          </Link>
-        </div>
-      </aside>
-      <div className="min-w-0 flex-1 md:pl-64">
-        <header className="sticky top-0 z-20 flex h-18 items-center gap-4 border-b border-ops-line bg-ops-deep/95 px-4 backdrop-blur-xl lg:px-7">
-          <MobileMenu />
-          <div>
-            <h1 className="font-display text-sm font-semibold text-ops-ink lg:text-lg">
-              Centro de Operaciones Digital
-            </h1>
-            <div className="mt-0.5 flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.14em] text-brand-sky">
-              <span className="size-1.5 rounded-full bg-sla-green" /> Sistema activo
+          <nav className="flex-1 overflow-y-auto px-3">
+            <EnlacesNav denso />
+          </nav>
+          <div className="m-4 rounded-lg border border-ops-line bg-ops-panel/60 p-3">
+            <div className="flex items-center gap-3">
+              <div className="grid size-9 place-items-center rounded-lg bg-brand-blue font-display text-xs font-bold">
+                DF
+              </div>
+              <div>
+                <p className="text-xs font-bold">Director de Flota</p>
+                <p className="text-[10px] text-ops-muted">Sesión de demostración</p>
+              </div>
             </div>
-          </div>
-          <Buscador />
-          <Button asChild size="sm" className="hidden rounded-lg font-bold sm:inline-flex">
-            <Link to="/reportar">Nuevo incidente</Link>
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-ops-muted"
-            aria-label="Ver alertas"
-            asChild
-          >
-            <Link to="/alertas">
-              <Bell />
+            <Link
+              to="/"
+              className="mt-3 flex items-center gap-2 border-t border-ops-line pt-3 text-xs text-ops-muted hover:text-ops-ink"
+            >
+              <LogOut className="size-4" /> Salir del centro
             </Link>
-          </Button>
-          <Reloj />
-        </header>
-        {children}
+          </div>
+        </aside>
+        <div className="min-w-0 flex-1 md:pl-64">
+          <header className="sticky top-0 z-20 flex h-18 items-center gap-2 border-b border-ops-line bg-ops-deep/95 px-4 backdrop-blur-xl sm:gap-4 lg:px-7">
+            <MobileMenu />
+            <div>
+              <h1 className="font-display text-sm font-semibold text-ops-ink lg:text-lg">
+                Centro de Operaciones Digital
+              </h1>
+              <div className="mt-0.5 flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.14em] text-brand-sky">
+                <span className="size-1.5 rounded-full bg-sla-green" /> Sistema activo
+              </div>
+            </div>
+            <Buscador />
+            <BotonGuia />
+            <Button asChild size="sm" className="hidden rounded-lg font-bold sm:inline-flex">
+              <Link to="/reportar">Nuevo incidente</Link>
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-ops-muted"
+              aria-label="Ver alertas"
+              asChild
+            >
+              <Link to="/alertas">
+                <Bell />
+              </Link>
+            </Button>
+            <Reloj />
+          </header>
+          {children}
+        </div>
       </div>
-    </div>
+    </RecorridoProvider>
   );
 }

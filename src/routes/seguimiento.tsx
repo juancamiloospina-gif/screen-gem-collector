@@ -45,7 +45,7 @@ function Seguimiento() {
       />
       <ProcesoNav casos={casos} ahora={ahora} activo="Seguimiento" />
 
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div data-tour="kpis" className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Kpi
           label="En ruta o atendiendo"
           value={String(r.lista.length)}
@@ -87,7 +87,7 @@ function Seguimiento() {
       </div>
 
       <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
-        <Panel eyebrow="En el terreno" titulo="Casos en ruta, en sitio y en traslado">
+        <Panel tour="lista" eyebrow="En el terreno" titulo="Casos en ruta, en sitio y en traslado">
           <ListaEtapa casos={r.lista} ahora={ahora} vacio="No hay casos en ruta ni en atención." />
         </Panel>
         <div className="space-y-5">
@@ -97,7 +97,7 @@ function Seguimiento() {
           >
             <PorVencerLista casos={r.lista} ahora={ahora} />
           </Panel>
-          <Panel eyebrow="Cierre y evaluación" titulo="Casos finalizados">
+          <Panel tour="cierre" eyebrow="Cierre y evaluación" titulo="Casos finalizados">
             <ul className="divide-y divide-ops-line">
               {cerrados.length === 0 && (
                 <li className="px-5 py-4 text-[11px] text-ops-muted">Aún no hay casos cerrados.</li>

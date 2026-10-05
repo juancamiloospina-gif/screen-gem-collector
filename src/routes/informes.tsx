@@ -186,7 +186,11 @@ function Informes() {
         texto="Los indicadores se calculan con los casos del centro; las metas se acuerdan con INDEGA a partir de la línea base del diagnóstico."
       />
 
-      <Panel eyebrow="Indicadores de gestión" titulo="Medición en vivo frente a meta y línea base">
+      <Panel
+        tour="indicadores"
+        eyebrow="Indicadores de gestión"
+        titulo="Medición en vivo frente a meta y línea base"
+      >
         <ul className="divide-y divide-ops-line md:hidden">
           {indicadores(filas, ahora).map((k) => (
             <li key={k.nombre} className="px-5 py-3">
@@ -236,7 +240,7 @@ function Informes() {
       </Panel>
 
       <div className="mt-5 grid gap-5 xl:grid-cols-[280px_minmax(0,1fr)]">
-        <Panel eyebrow="Informes" titulo="Periodicidad y destinatarios">
+        <Panel tour="informes" eyebrow="Informes" titulo="Periodicidad y destinatarios">
           <ul className="divide-y divide-ops-line">
             <li>
               <Link to="/centro" className="block px-5 py-3 hover:bg-ops-panel/50">

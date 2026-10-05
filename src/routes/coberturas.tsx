@@ -66,7 +66,11 @@ function Coberturas() {
       </div>
 
       <div className="mt-5 grid gap-5 xl:grid-cols-2">
-        <Panel eyebrow="Aprobación previa" titulo="Excedentes reportados en casos activos">
+        <Panel
+          tour="excedentes"
+          eyebrow="Aprobación previa"
+          titulo="Excedentes reportados en casos activos"
+        >
           <ul className="divide-y divide-ops-line">
             {excedentes.map(({ caso, e }) => (
               <li key={e.id} className="px-5 py-4">
@@ -115,7 +119,11 @@ function Coberturas() {
         </Panel>
 
         <div className="space-y-5">
-          <Panel eyebrow="Validación en la toma" titulo="Casos fuera de cobertura">
+          <Panel
+            tour="validacion"
+            eyebrow="Validación en la toma"
+            titulo="Casos fuera de cobertura"
+          >
             <ul className="divide-y divide-ops-line">
               {noCubiertos.length === 0 && (
                 <li className="px-5 py-4 text-[11px] text-ops-muted">
@@ -186,6 +194,7 @@ function Coberturas() {
 
       <Panel
         className="mt-5"
+        tour="conciliacion"
         eyebrow="Conciliación mensual"
         titulo="Flota real frente a cartera asegurada · septiembre 2026"
       >

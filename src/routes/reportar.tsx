@@ -323,7 +323,10 @@ function Reportar() {
         </p>
       </div>
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
-        <section className="flex min-w-0 flex-col overflow-hidden rounded-xl border border-ops-line bg-ops-navy">
+        <section
+          data-tour="chat"
+          className="flex min-w-0 flex-col overflow-hidden rounded-xl border border-ops-line bg-ops-navy"
+        >
           <div className="flex h-16 items-center justify-between border-b border-ops-line px-5">
             <span className="flex items-center gap-3 text-sm font-bold">
               <span className="grid size-9 place-items-center rounded-lg bg-brand-blue/20 text-brand-sky">
@@ -460,7 +463,10 @@ function Reportar() {
         </section>
 
         <aside className="space-y-5">
-          <div className="overflow-hidden rounded-xl border border-ops-line bg-ops-navy">
+          <div
+            data-tour="ejemplos"
+            className="overflow-hidden rounded-xl border border-ops-line bg-ops-navy"
+          >
             <div className="border-b border-ops-line p-5">
               <MessageSquareText className="size-5 text-brand-sky" />
               <h3 className="mt-3 text-sm font-bold">Probar con un ejemplo</h3>

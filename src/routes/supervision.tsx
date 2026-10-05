@@ -151,6 +151,7 @@ function Supervision() {
 
       <div className="mt-5 grid gap-5 xl:grid-cols-2">
         <Panel
+          tour="inactividad"
           eyebrow="Alerta por inactividad"
           titulo="Casos sin cambio de estado"
           accion={<Hourglass className="size-4 text-sla-red" />}
@@ -178,6 +179,7 @@ function Supervision() {
         </Panel>
 
         <Panel
+          tour="traspaso"
           eyebrow="Traspaso a humano"
           titulo="Casos tomados por un supervisor"
           accion={<Headset className="size-4 text-sla-amber" />}
@@ -217,6 +219,7 @@ function Supervision() {
         </Panel>
 
         <Panel
+          tour="turno"
           eyebrow="Entrega de turno"
           titulo="Revisión formal de casos abiertos"
           accion={<ClipboardCheck className="size-4 text-brand-sky" />}

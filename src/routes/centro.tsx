@@ -87,7 +87,7 @@ function Centro() {
       </Encabezado>
 
       {/* 1. KPIs por prioridad */}
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-6">
+      <div data-tour="kpis" className="grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-6">
         <Kpi
           label="Casos críticos"
           value={String(rojos.length)}
@@ -159,6 +159,7 @@ function Centro() {
         />
         <div className="space-y-5">
           <Panel
+            tour="predictivo"
             eyebrow="Predictivo"
             titulo={`Se vencen en los próximos ${VENTANA_PREDICTIVA_MIN} min`}
             accion={<Timer className="size-4 text-sla-amber" />}
@@ -166,6 +167,7 @@ function Centro() {
             <PorVencerLista casos={casos} ahora={ahora} limite={5} />
           </Panel>
           <Panel
+            tour="criticos"
             eyebrow="Prioridad operativa"
             titulo="Críticos ahora"
             accion={

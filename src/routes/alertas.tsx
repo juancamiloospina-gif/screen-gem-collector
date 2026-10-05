@@ -56,7 +56,10 @@ function Alertas() {
         </p>
       </div>
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
-        <section className="overflow-hidden rounded-xl border border-ops-line bg-ops-navy">
+        <section
+          data-tour="bandeja"
+          className="overflow-hidden rounded-xl border border-ops-line bg-ops-navy"
+        >
           <div className="flex items-center justify-between border-b border-ops-line p-5">
             <div className="flex items-center gap-3">
               <div className="grid size-10 place-items-center rounded-lg bg-sla-red/15 text-sla-red">
@@ -134,7 +137,7 @@ function Alertas() {
             })}
           </div>
         </section>
-        <aside className="space-y-4">
+        <aside data-tour="regla" className="space-y-4">
           <div className="rounded-xl border border-ops-line bg-ops-navy p-5">
             <ShieldAlert className="size-6 text-brand-sky" />
             <h3 className="mt-4 font-display text-lg font-semibold">Regla de escalamiento</h3>

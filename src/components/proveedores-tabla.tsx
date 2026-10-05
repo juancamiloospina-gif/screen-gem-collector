@@ -30,6 +30,7 @@ export function ProveedoresTabla({
     }`;
   return (
     <Panel
+      tour="proveedores"
       eyebrow="Red conectada"
       titulo={`${lista.length} unidades${ciudad ? ` en ${ciudad}` : ""}`}
       accion={

@@ -61,7 +61,7 @@ export function MatrizDolor({
   };
 
   function Celdilla({ c, f }: { c: string | null; f: Familia | null }) {
-    const sel = c === ciudad && f === familia;
+    const sel = (c !== null || f !== null) && c === ciudad && f === familia;
     let tono: keyof typeof TONO_CELDA = "vacio";
     let principal = "–";
     let secundario = "";
@@ -124,6 +124,7 @@ export function MatrizDolor({
 
   return (
     <Panel
+      tour="matriz"
       eyebrow="Dónde está el dolor"
       titulo={
         lente === "criticos"

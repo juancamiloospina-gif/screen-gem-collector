@@ -74,6 +74,7 @@ export function CapacidadRed({
   );
   return (
     <Panel
+      tour="red"
       eyebrow="Capacidad de red"
       titulo="Proveedores conectados frente a la demanda"
       accion={<Chip tono="azul">{total.disponibles + total.ocupados + total.fuera} unidades</Chip>}

@@ -70,7 +70,7 @@ function Analitica() {
       </div>
 
       <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
-        <Panel eyebrow="Análisis geográfico" titulo="Mapa de calor de incidentes">
+        <Panel tour="mapa-calor" eyebrow="Análisis geográfico" titulo="Mapa de calor de incidentes">
           <div className="grid gap-5 p-5 md:grid-cols-[minmax(0,1fr)_220px]">
             <div className="relative aspect-square w-full overflow-hidden rounded-lg bg-ops-deep">
               <MapaBase
@@ -176,6 +176,7 @@ function Analitica() {
 
       <div className="mt-5 grid gap-5 xl:grid-cols-2">
         <Panel
+          tour="recurrencia"
           eyebrow="Recurrencia por vehículo"
           titulo="Placas con más eventos · insumo para mantenimiento"
         >

@@ -50,7 +50,7 @@ function Back() {
       />
       <ProcesoNav casos={casos} ahora={ahora} activo="Back" />
 
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div data-tour="kpis" className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Kpi
           label="En radicación y asignación"
           value={String(r.lista.length)}
@@ -98,7 +98,11 @@ function Back() {
           lenteInicial="red"
         />
         <div className="space-y-5">
-          <Panel eyebrow="Radicación y asignación" titulo="Casos en gestión con el proveedor">
+          <Panel
+            tour="radicacion"
+            eyebrow="Radicación y asignación"
+            titulo="Casos en gestión con el proveedor"
+          >
             <ListaEtapa
               casos={r.lista}
               ahora={ahora}

@@ -65,7 +65,7 @@ function Front() {
       </Encabezado>
       <ProcesoNav casos={casos} ahora={ahora} activo="Front" />
 
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div data-tour="kpis" className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Kpi
           label="En toma ahora"
           value={String(r.lista.length)}
@@ -102,7 +102,7 @@ function Front() {
 
       <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
         <div className="space-y-5">
-          <Panel eyebrow="Cola de toma" titulo="Solicitudes en la puerta">
+          <Panel tour="cola" eyebrow="Cola de toma" titulo="Solicitudes en la puerta">
             <ListaEtapa
               casos={r.lista}
               ahora={ahora}
@@ -138,7 +138,11 @@ function Front() {
             </div>
           </Panel>
 
-          <Panel eyebrow="Validación en la toma" titulo="Cobertura de los casos abiertos">
+          <Panel
+            tour="cobertura"
+            eyebrow="Validación en la toma"
+            titulo="Cobertura de los casos abiertos"
+          >
             <div className="grid grid-cols-3 gap-px bg-ops-line text-center">
               {(["Cubierto", "Fuera de cartera", "Servicio no cubierto"] as const).map((e) => (
                 <div key={e} className="bg-ops-navy px-2 py-3">

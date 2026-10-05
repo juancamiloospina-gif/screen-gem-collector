@@ -44,6 +44,7 @@ export function MapaColombia({
 
   return (
     <section
+      data-tour="mapa"
       className={`flex flex-col overflow-hidden rounded-xl border border-ops-line bg-ops-navy shadow-2xl ${alto}`}
     >
       <div className="space-y-3 border-b border-ops-line px-5 py-4">

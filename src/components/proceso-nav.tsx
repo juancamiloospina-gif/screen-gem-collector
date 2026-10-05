@@ -20,7 +20,11 @@ export function ProcesoNav({
   activo: Proceso | null;
 }) {
   return (
-    <nav className="mb-6 grid gap-2 sm:grid-cols-3" aria-label="Procesos críticos">
+    <nav
+      data-tour="procesos"
+      className="mb-6 grid gap-2 sm:grid-cols-3"
+      aria-label="Procesos críticos"
+    >
       {TABS.map((t) => {
         const r = resumenProceso(casos, ahora, t.proceso);
         const sel = t.proceso === activo;
