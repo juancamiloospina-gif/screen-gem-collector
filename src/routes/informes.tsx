@@ -5,6 +5,7 @@ import { Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Barra, Chip, ChipExcedente, Encabezado, Panel } from "@/components/ops";
 import { useAhora } from "@/hooks/use-ahora";
+import { fechaLargaColombia } from "@/lib/hora";
 import {
   COLOR_SEMAFORO,
   casosConEventosQuery,
@@ -320,11 +321,7 @@ function ResumenDiario({ filas, ahora }: { filas: Fila[]; ahora: number }) {
   const casos = filas.map((f) => f.caso);
   const abiertos = casos.filter(esAbierto);
   const criticos = abiertos.filter((c) => semaforo(c, ahora) === "rojo" || c.excepcion);
-  const fecha = new Date(ahora).toLocaleDateString("es-CO", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-  });
+  const fecha = fechaLargaColombia(ahora);
   return (
     <>
       <p className="text-[11px] text-ops-muted">

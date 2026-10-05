@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Chip, ChipAtencion, ChipExcepcion, Encabezado, Kpi, Panel } from "@/components/ops";
 import { useAhora } from "@/hooks/use-ahora";
+import { horaColombia } from "@/lib/hora";
 import {
   COLOR_SEMAFORO,
   MATRIZ_COMUNICACION,
@@ -268,15 +269,7 @@ function Supervision() {
                   size="sm"
                   className="rounded-lg font-bold"
                   disabled={revisados.size < abiertos.length}
-                  onClick={() =>
-                    setEntrega(
-                      new Date().toLocaleTimeString("es-CO", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        hour12: false,
-                      }),
-                    )
-                  }
+                  onClick={() => setEntrega(horaColombia())}
                 >
                   Registrar entrega de turno
                 </Button>

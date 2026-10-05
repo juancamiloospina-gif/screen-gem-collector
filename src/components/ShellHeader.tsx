@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import { BotonGuia, RecorridoProvider } from "@/components/recorrido";
+import { horaColombia } from "@/lib/hora";
 import { Button } from "@/components/ui/button";
 import { casosQuery } from "@/lib/casos";
 import { FLOTA } from "@/lib/flota";
@@ -212,15 +213,7 @@ function Marca() {
 function Reloj() {
   const [hora, setHora] = useState("--:--:--");
   useEffect(() => {
-    const tick = () =>
-      setHora(
-        new Date().toLocaleTimeString("es-CO", {
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-          hour12: false,
-        }),
-      );
+    const tick = () => setHora(horaColombia(new Date(), true));
     tick();
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { MapaBase, posicionEnCiudad } from "@/components/MapaBase";
 import { useAhora } from "@/hooks/use-ahora";
+import { horaColombia } from "@/lib/hora";
 import { COLOR_SEMAFORO, casosQuery, esAbierto, semaforo } from "@/lib/casos";
 
 export const Route = createFileRoute("/")({
@@ -41,7 +42,7 @@ function Marca() {
 function RelojCOT() {
   const [hora, setHora] = useState("--:--:--");
   useEffect(() => {
-    const tick = () => setHora(new Date().toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }));
+    const tick = () => setHora(horaColombia(new Date(), true));
     tick();
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);

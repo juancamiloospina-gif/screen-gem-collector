@@ -3,6 +3,7 @@
 // aprobar un excedente) dura mientras la pestaña esté abierta. Ver
 // supabase/migrations/ para el esquema de referencia de la fase real.
 
+import { fechaHoraColombia } from "./hora";
 import {
   COBERTURA_POR_TIPO,
   DIRECTOR_FLOTA,
@@ -186,14 +187,7 @@ export function esAbierto(caso: Caso) {
 }
 
 export function formatoReloj(fecha: string | Date) {
-  const d = typeof fecha === "string" ? new Date(fecha) : fecha;
-  return d.toLocaleString("es-CO", {
-    day: "2-digit",
-    month: "short",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  });
+  return fechaHoraColombia(fecha);
 }
 
 // --- Control de inactividad (§3.6) -------------------------------------

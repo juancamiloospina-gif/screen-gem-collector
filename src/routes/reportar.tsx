@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CIUDADES, crearCaso, type Caso } from "@/lib/casos";
+import { horaColombia } from "@/lib/hora";
 import {
   POLIZA,
   REGIONALES,
@@ -85,11 +86,7 @@ function ajustarGrua(servicio: string, tipoVehiculo: string) {
 }
 
 function ahoraHora() {
-  return new Date().toLocaleTimeString("es-CO", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  });
+  return horaColombia();
 }
 
 function detectar(texto: string): Deteccion {
