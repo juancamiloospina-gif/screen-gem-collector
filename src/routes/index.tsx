@@ -132,12 +132,12 @@ function Inicio() {
                   key={perfil}
                   asChild
                   variant={perfil === "director" ? "default" : "outline"}
-                  className="h-auto min-h-20 justify-between rounded-lg px-4 py-3 text-left"
+                  className="h-auto min-h-20 min-w-0 justify-between overflow-hidden rounded-lg px-4 py-3 text-left"
                 >
-                  <Link to={ruta} onClick={() => guardarPerfil(perfil)}>
-                    <span>
+                  <Link to={ruta} onClick={() => guardarPerfil(perfil)} className="min-w-0">
+                    <span className="min-w-0 flex-1">
                       <span className="block text-xs font-bold">{PERFILES[perfil].nombre}</span>
-                      <span className="mt-1 block text-[10px] font-normal opacity-75">
+                      <span className="mt-1 block break-words text-[10px] font-normal leading-snug opacity-75">
                         {PERFILES[perfil].descripcion}
                       </span>
                     </span>
