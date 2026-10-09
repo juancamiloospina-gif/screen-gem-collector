@@ -11,12 +11,15 @@ import {
   FileText,
   Flag,
   MapPin,
+  MessageSquare,
   Radio,
   Route as RouteIcon,
+  Send,
   ShieldAlert,
   Star,
   Truck,
   UserRound,
+  PhoneCall,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -38,6 +41,7 @@ import {
   aprobarCobertura,
   avanzarEtapa,
   casoQuery,
+  actualizarSeguimiento,
   ETIQUETA_FAMILIA,
   esAbierto,
   familiaDe,
@@ -50,11 +54,14 @@ import {
   procesoDe,
   registrarNovedad,
   resolverExcedente,
+  registrarContactoProveedor,
   semaforo,
   topeKm,
   traspasarASupervisor,
   vehiculoDe,
   type Excepcion,
+  type Caso,
+  type EstadoSeguimiento,
 } from "@/lib/casos";
 import { POLIZA, formatoCOP } from "@/lib/flota";
 
@@ -206,6 +213,10 @@ function DetalleCaso() {
             </Button>
           )}
         </div>
+      )}
+
+      {abierto && (s === "rojo" || inactivo || caso.motivo_traspaso) && (
+        <SeguimientoAtraso caso={caso} onRefresh={refrescar} />
       )}
 
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1.4fr)_380px]">
@@ -563,6 +574,169 @@ function DetalleCaso() {
         }}
       />
     </main>
+  );
+}
+
+function SeguimientoAtraso({ caso, onRefresh }: { caso: Caso; onRefresh: () => Promise<void> }) {
+  const [razon, setRazon] = useState(caso.razon_atraso ?? "");
+  const [compromiso, setCompromiso] = useState("");
+  const [mensaje, setMensaje] = useState("");
+  const [guardando, setGuardando] = useState(false);
+
+  async function registrarContacto() {
+    if (!razon.trim() || !compromiso.trim()) return;
+    setGuardando(true);
+    try {
+      await registrarContactoProveedor(caso.id, {
+        razon_atraso: razon.trim(),
+        compromiso: compromiso.trim(),
+      });
+      setCompromiso("");
+      await onRefresh();
+    } finally {
+      setGuardando(false);
+    }
+  }
+
+  async function enviarMensaje() {
+    if (!mensaje.trim()) return;
+    setGuardando(true);
+    try {
+      await registrarNovedad(
+        caso.id,
+        mensaje.trim(),
+        caso.responsable ? `Responsable · ${caso.responsable}` : "Supervisor · Laura Díaz",
+      );
+      setMensaje("");
+      await onRefresh();
+    } finally {
+      setGuardando(false);
+    }
+  }
+
+  return (
+    <section className="mb-5 overflow-hidden rounded-xl border border-sla-red/30 bg-ops-navy">
+      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-ops-line p-5">
+        <div className="flex items-start gap-3">
+          <div className="grid size-10 place-items-center rounded-lg bg-sla-red/15 text-sla-red">
+            <PhoneCall className="size-5" />
+          </div>
+          <div>
+            <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-sla-red">
+              Gestión de caso crítico
+            </p>
+            <h3 className="mt-1 text-sm font-bold">Seguimiento con responsable y proveedor</h3>
+            <p className="mt-1 text-[11px] text-ops-muted">
+              El caso queda trazable desde la alerta hasta la explicación del atraso.
+            </p>
+          </div>
+        </div>
+        <div className="text-right text-[11px]">
+          <p className="text-ops-muted">Responsable</p>
+          <p className="mt-1 flex items-center justify-end gap-1 font-bold text-brand-sky">
+            <UserRound className="size-3.5" /> {caso.responsable ?? "Sin asignar"}
+          </p>
+          <p className="mt-1 text-ops-muted">Estado: {caso.estado_seguimiento}</p>
+        </div>
+      </div>
+
+      <div className="grid gap-5 p-5 lg:grid-cols-2">
+        <div>
+          <div className="flex items-center gap-2 text-xs font-bold">
+            <PhoneCall className="size-4 text-brand-sky" /> Registrar llamada al proveedor
+          </div>
+          <div className="mt-3 space-y-3">
+            <input
+              value={razon}
+              onChange={(e) => setRazon(e.target.value)}
+              placeholder="Razón del atraso (ej. proveedor atendía otro servicio)"
+              className="h-10 w-full rounded-lg border border-ops-line bg-ops-deep px-3 text-xs text-ops-ink outline-none placeholder:text-ops-muted focus:border-brand-sky"
+            />
+            <textarea
+              value={compromiso}
+              onChange={(e) => setCompromiso(e.target.value)}
+              placeholder="Compromiso y próxima acción (ej. llega en 20 minutos)"
+              className="min-h-20 w-full rounded-lg border border-ops-line bg-ops-deep p-3 text-xs text-ops-ink outline-none placeholder:text-ops-muted focus:border-brand-sky"
+            />
+            <Button
+              type="button"
+              size="sm"
+              disabled={guardando || !razon.trim() || !compromiso.trim()}
+              onClick={registrarContacto}
+              className="rounded-lg font-bold"
+            >
+              Guardar llamada
+            </Button>
+          </div>
+        </div>
+
+        <div>
+          <div className="flex items-center gap-2 text-xs font-bold">
+            <MessageSquare className="size-4 text-brand-sky" /> Chat con el responsable
+          </div>
+          <div className="mt-3 flex gap-2">
+            <textarea
+              value={mensaje}
+              onChange={(e) => setMensaje(e.target.value)}
+              placeholder="Escribe la actualización para el responsable…"
+              className="min-h-20 flex-1 rounded-lg border border-ops-line bg-ops-deep p-3 text-xs text-ops-ink outline-none placeholder:text-ops-muted focus:border-brand-sky"
+            />
+            <Button
+              type="button"
+              size="icon"
+              disabled={guardando || !mensaje.trim()}
+              onClick={enviarMensaje}
+              aria-label="Enviar actualización"
+              className="mt-auto shrink-0 rounded-lg"
+            >
+              <Send className="size-4" />
+            </Button>
+          </div>
+          <div className="mt-3 flex items-center gap-2">
+            <label className="text-[10px] text-ops-muted" htmlFor="estado-seguimiento">
+              Estado
+            </label>
+            <select
+              id="estado-seguimiento"
+              value={caso.estado_seguimiento}
+              onChange={async (e) => {
+                await actualizarSeguimiento(caso.id, e.target.value as EstadoSeguimiento);
+                await onRefresh();
+              }}
+              className="h-8 rounded-lg border border-ops-line bg-ops-deep px-2 text-[10px] text-ops-ink"
+            >
+              {(["Pendiente", "En contacto", "Controlado", "Resuelto"] as EstadoSeguimiento[]).map(
+                (estado) => (
+                  <option key={estado}>{estado}</option>
+                ),
+              )}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {caso.contactos_proveedor.length > 0 && (
+        <div className="border-t border-ops-line px-5 py-4">
+          <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-brand-sky">
+            Últimos contactos
+          </p>
+          <ul className="mt-3 grid gap-2 text-[11px] sm:grid-cols-2">
+            {[...caso.contactos_proveedor].reverse().slice(0, 4).map((contacto, i) => (
+              <li key={`${contacto.en}-${i}`} className="rounded-lg bg-ops-deep p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="font-bold">{contacto.canal} · {contacto.proveedor}</span>
+                  <span className="font-data text-[10px] text-ops-muted">
+                    {formatoReloj(contacto.en)}
+                  </span>
+                </div>
+                <p className="mt-1 text-ops-muted">{contacto.razon_atraso}</p>
+                <p className="mt-1">Compromiso: {contacto.compromiso}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </section>
   );
 }
 

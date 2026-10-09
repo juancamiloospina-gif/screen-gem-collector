@@ -70,6 +70,17 @@ export type Excedente = {
 
 export type Novedad = { en: string; autor: string; texto: string };
 
+export type CanalContacto = "Llamada" | "Chat";
+export type EstadoSeguimiento = "Pendiente" | "En contacto" | "Controlado" | "Resuelto";
+export type ContactoProveedor = {
+  en: string;
+  autor: string;
+  proveedor: string;
+  canal: CanalContacto;
+  razon_atraso: string;
+  compromiso: string;
+};
+
 export type Caso = {
   id: string;
   numero: number;
@@ -96,6 +107,10 @@ export type Caso = {
   excepcion: Excepcion | null;
   atendido_por: "Agente IA" | "Supervisor humano";
   motivo_traspaso: string | null;
+  responsable: string | null;
+  estado_seguimiento: EstadoSeguimiento;
+  razon_atraso: string | null;
+  contactos_proveedor: ContactoProveedor[];
   excedentes: Excedente[];
   encuesta: { nps: number; comentario: string } | null;
   novedades: Novedad[];
@@ -334,9 +349,18 @@ type CasoSemilla = {
   excedentes?: Omit<Excedente, "id">[];
   encuesta?: Caso["encuesta"];
   novedades?: { haceMin: number; autor: string; texto: string }[];
+  razon_atraso?: string;
+  responsable?: string;
 };
 
-type CasoInterno = Omit<Caso, "creado_en" | "ultimo_cambio_en" | "novedades" | "excedentes"> & {
+type CasoInterno = Omit<
+  Caso,
+  | "creado_en"
+  | "ultimo_cambio_en"
+  | "novedades"
+  | "excedentes"
+  | "contactos_proveedor"
+> & {
   excedentes: Excedente[];
   // Caso semilla: fechas relativas a "ahora".
   minutosOriginales?: number | undefined;
@@ -346,6 +370,7 @@ type CasoInterno = Omit<Caso, "creado_en" | "ultimo_cambio_en" | "novedades" | "
   creadoEnFijo?: string;
   cambiosFijos: { etapa: Etapa; en: string }[];
   novedadesFijas: Novedad[];
+  contactosProveedorFijos: ContactoProveedor[];
   notaCreacion?: string;
 };
 
@@ -774,6 +799,7 @@ function nuevoInterno(
     | "atendido_por"
     | "cambiosFijos"
     | "novedadesFijas"
+    | "contactosProveedorFijos"
     | "cliente"
     | "campana"
   > & { motivo_traspaso: string | null },
@@ -791,6 +817,7 @@ function nuevoInterno(
     atendido_por: base.motivo_traspaso ? "Supervisor humano" : "Agente IA",
     cambiosFijos: [],
     novedadesFijas: [],
+    contactosProveedorFijos: [],
   };
 }
 
@@ -815,6 +842,9 @@ const casos: CasoInterno[] = CASOS_SEMILLA.map((s, i) =>
     origen: "Agente IA · WhatsApp",
     excepcion: s.excepcion ?? null,
     motivo_traspaso: s.motivo_traspaso ?? null,
+    responsable: s.responsable ?? (s.motivo_traspaso ? "Laura Díaz" : null),
+    estado_seguimiento: s.motivo_traspaso ? "En contacto" : "Pendiente",
+    razon_atraso: s.razon_atraso ?? s.motivo_traspaso ?? null,
     excedentes: (s.excedentes ?? []).map((e, j) => ({ ...e, id: `${s.placa}-exc-${j}` })),
     encuesta: s.encuesta ?? null,
     minutosOriginales: s.minutosOriginales,
@@ -883,6 +913,7 @@ function aCaso(c: CasoInterno, ahoraMs: number): Caso {
     creadoEnFijo: _cf,
     cambiosFijos: _cfs,
     novedadesFijas: _nf,
+    contactosProveedorFijos: _cpf,
     notaCreacion: _nc,
     ...resto
   } = c;
@@ -891,6 +922,7 @@ function aCaso(c: CasoInterno, ahoraMs: number): Caso {
     creado_en: new Date(creadoEnMs(c, ahoraMs)).toISOString(),
     ultimo_cambio_en: eventos[eventos.length - 1]!.ocurrido_en,
     novedades,
+    contactos_proveedor: c.contactosProveedorFijos,
   };
 }
 
@@ -978,6 +1010,17 @@ export function notificacionesDe(
       `Incumplimiento: ${caso.placa} superó los ${caso.prometido_min} min prometidos.`,
     );
   }
+  if (caso.responsable && caso.motivo_traspaso) {
+    out.push({
+      id: `${caso.id}-responsable`,
+      en: caso.creado_en,
+      actor: "Sistema",
+      destinatario: caso.responsable,
+      canal: "Chat",
+      mensaje: `Caso crítico asignado para seguimiento: ${caso.motivo_traspaso}`,
+      estado: "Entregado",
+    });
+  }
   return out.sort((a, b) => new Date(b.en).getTime() - new Date(a.en).getTime());
 }
 
@@ -1042,6 +1085,12 @@ export async function crearCaso(input: {
     mapa_y: coord.y + (Math.random() * 4 - 2),
     origen: "Agente IA · WhatsApp",
     excepcion: cob.estado === "Cubierto" ? null : "Servicio no cubierto",
+    responsable: cob.estado === "Cubierto" ? null : "Laura Díaz",
+    estado_seguimiento: cob.estado === "Cubierto" ? "Pendiente" : "En contacto",
+    razon_atraso:
+      cob.estado === "Cubierto"
+        ? null
+        : `${cob.estado}: requiere aprobación de INDEGA antes de radicar`,
     motivo_traspaso:
       cob.estado === "Cubierto"
         ? null
@@ -1110,7 +1159,55 @@ export async function traspasarASupervisor(id: string, motivo: string) {
   const c = buscarInterno(id);
   c.atendido_por = "Supervisor humano";
   c.motivo_traspaso = motivo;
+  c.responsable ??= "Laura Díaz";
+  c.estado_seguimiento = "Pendiente";
+  c.razon_atraso = motivo;
   registrar(c, "Agente IA", `Caso traspasado a supervisión humana: ${motivo}`);
+}
+
+export async function escalarCaso(id: string, motivo: string, responsable = "Laura Díaz") {
+  const c = buscarInterno(id);
+  c.atendido_por = "Supervisor humano";
+  c.responsable = responsable;
+  c.estado_seguimiento = "Pendiente";
+  c.razon_atraso = motivo;
+  c.motivo_traspaso = motivo;
+  registrar(c, "Agente IA", `Caso escalado a ${responsable}: ${motivo}`);
+}
+
+export async function registrarContactoProveedor(
+  id: string,
+  input: {
+    razon_atraso: string;
+    compromiso: string;
+    canal?: CanalContacto;
+    autor?: string;
+  },
+) {
+  const c = buscarInterno(id);
+  const contacto: ContactoProveedor = {
+    en: new Date().toISOString(),
+    autor: input.autor ?? c.responsable ?? "Supervisor · Laura Díaz",
+    proveedor: c.proveedor ?? "Proveedor pendiente de asignación",
+    canal: input.canal ?? "Llamada",
+    razon_atraso: input.razon_atraso,
+    compromiso: input.compromiso,
+  };
+  c.contactosProveedorFijos.push(contacto);
+  c.responsable ??= "Laura Díaz";
+  c.estado_seguimiento = "En contacto";
+  c.razon_atraso = input.razon_atraso;
+  registrar(
+    c,
+    contacto.autor,
+    `${contacto.canal} a ${contacto.proveedor}. Razón: ${input.razon_atraso}. Compromiso: ${input.compromiso}`,
+  );
+}
+
+export async function actualizarSeguimiento(id: string, estado: EstadoSeguimiento) {
+  const c = buscarInterno(id);
+  c.estado_seguimiento = estado;
+  registrar(c, c.responsable ?? "Supervisor · Laura Díaz", `Seguimiento actualizado a "${estado}".`);
 }
 
 export async function aprobarCobertura(id: string) {
