@@ -70,7 +70,7 @@ export type Excedente = {
 
 export type Novedad = { en: string; autor: string; texto: string };
 
-export type CanalContacto = "Llamada" | "Chat";
+export type CanalContacto = "Llamada" | "WhatsApp" | "Chat" | "Correo" | "Otro";
 export type EstadoSeguimiento = "Pendiente" | "En contacto" | "Controlado" | "Resuelto";
 export type ContactoProveedor = {
   en: string;

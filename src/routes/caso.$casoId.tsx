@@ -61,6 +61,7 @@ import {
   vehiculoDe,
   type Excepcion,
   type Caso,
+  type CanalContacto,
   type EstadoSeguimiento,
 } from "@/lib/casos";
 import { POLIZA, formatoCOP } from "@/lib/flota";
@@ -581,6 +582,7 @@ function SeguimientoAtraso({ caso, onRefresh }: { caso: Caso; onRefresh: () => P
   const [razon, setRazon] = useState(caso.razon_atraso ?? "");
   const [compromiso, setCompromiso] = useState("");
   const [mensaje, setMensaje] = useState("");
+  const [canal, setCanal] = useState<CanalContacto>("Llamada");
   const [guardando, setGuardando] = useState(false);
 
   async function registrarContacto() {
@@ -590,6 +592,7 @@ function SeguimientoAtraso({ caso, onRefresh }: { caso: Caso; onRefresh: () => P
       await registrarContactoProveedor(caso.id, {
         razon_atraso: razon.trim(),
         compromiso: compromiso.trim(),
+        canal,
       });
       setCompromiso("");
       await onRefresh();
@@ -643,37 +646,60 @@ function SeguimientoAtraso({ caso, onRefresh }: { caso: Caso; onRefresh: () => P
       <div className="grid gap-5 p-5 lg:grid-cols-2">
         <div>
           <div className="flex items-center gap-2 text-xs font-bold">
-            <PhoneCall className="size-4 text-brand-sky" /> Registrar llamada al proveedor
+            <PhoneCall className="size-4 text-brand-sky" /> Contacto directo con el proveedor
           </div>
+          <p className="mt-2 text-[11px] text-ops-muted">
+            {caso.proveedor
+              ? `Proveedor asignado: ${caso.proveedor}`
+              : "Proveedor pendiente de asignación. No se puede iniciar el contacto todavía."}
+          </p>
           <div className="mt-3 space-y-3">
+            <select
+              value={canal}
+              onChange={(e) => setCanal(e.target.value as CanalContacto)}
+              disabled={!caso.proveedor}
+              aria-label="Canal de contacto con el proveedor"
+              className="h-10 w-full rounded-lg border border-ops-line bg-ops-deep px-3 text-xs text-ops-ink outline-none focus:border-brand-sky disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {(["Llamada", "WhatsApp", "Chat", "Correo", "Otro"] as CanalContacto[]).map(
+                (opcion) => (
+                  <option key={opcion}>{opcion}</option>
+                ),
+              )}
+            </select>
             <input
               value={razon}
               onChange={(e) => setRazon(e.target.value)}
+              disabled={!caso.proveedor}
               placeholder="Razón del atraso (ej. proveedor atendía otro servicio)"
               className="h-10 w-full rounded-lg border border-ops-line bg-ops-deep px-3 text-xs text-ops-ink outline-none placeholder:text-ops-muted focus:border-brand-sky"
             />
             <textarea
               value={compromiso}
               onChange={(e) => setCompromiso(e.target.value)}
+              disabled={!caso.proveedor}
               placeholder="Compromiso y próxima acción (ej. llega en 20 minutos)"
               className="min-h-20 w-full rounded-lg border border-ops-line bg-ops-deep p-3 text-xs text-ops-ink outline-none placeholder:text-ops-muted focus:border-brand-sky"
             />
             <Button
               type="button"
               size="sm"
-              disabled={guardando || !razon.trim() || !compromiso.trim()}
+              disabled={guardando || !caso.proveedor || !razon.trim() || !compromiso.trim()}
               onClick={registrarContacto}
               className="rounded-lg font-bold"
             >
-              Guardar llamada
+              Registrar contacto
             </Button>
           </div>
         </div>
 
         <div>
           <div className="flex items-center gap-2 text-xs font-bold">
-            <MessageSquare className="size-4 text-brand-sky" /> Chat con el responsable
+            <MessageSquare className="size-4 text-brand-sky" /> Chat directo con el supervisor
           </div>
+          <p className="mt-2 text-[11px] text-ops-muted">
+            Destinatario: <span className="font-bold text-brand-sky">{caso.responsable ?? "Supervisor pendiente"}</span>
+          </p>
           <div className="mt-3 flex gap-2">
             <textarea
               value={mensaje}
