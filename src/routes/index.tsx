@@ -8,6 +8,7 @@ import { useAhora } from "@/hooks/use-ahora";
 import { horaColombia } from "@/lib/hora";
 import { COLOR_SEMAFORO, casosQuery, esAbierto, semaforo } from "@/lib/casos";
 import { guardarPerfil, PERFILES, type Perfil } from "@/lib/perfiles";
+import { TemaToggle } from "@/components/theme-toggle";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -94,9 +95,12 @@ function Inicio() {
     <main className="min-h-screen bg-brand-mist text-brand-navy">
       <header className="mx-auto flex h-20 max-w-[1440px] items-center justify-between px-6 lg:px-10">
         <Marca />
-        <span className="hidden items-center gap-2 text-xs font-semibold text-brand-blue sm:flex">
-          <span className="size-2 rounded-full bg-sla-green" /> Plataforma operativa disponible
-        </span>
+        <div className="flex items-center gap-4">
+          <span className="hidden items-center gap-2 text-xs font-semibold text-brand-blue sm:flex">
+            <span className="size-2 rounded-full bg-sla-green" /> Plataforma operativa disponible
+          </span>
+          <TemaToggle compact />
+        </div>
       </header>
       <section className="mx-auto grid min-h-[calc(100vh-5rem)] max-w-[1440px] items-center gap-12 px-6 pb-10 pt-8 lg:grid-cols-[1.05fr_.95fr] lg:px-10">
         <div className="max-w-2xl">

@@ -5,35 +5,241 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --radius-sm: calc(var(--radius) - 4px); --radius-md: calc(var(--radius) - 2px); --radius-lg: var(--radius); --radius-xl: calc(var(--radius) + 4px);
-  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif; --font-display: "Sora", ui-sans-serif, sans-serif; --font-data: "DM Mono", ui-monospace, monospace;
-  --color-brand-navy: var(--brand-navy); --color-brand-blue: var(--brand-blue); --color-brand-sky: var(--brand-sky); --color-brand-mist: var(--brand-mist); --color-surface: var(--surface);
-  --color-ops-deep: var(--ops-deep); --color-ops-navy: var(--ops-navy); --color-ops-panel: var(--ops-panel); --color-ops-line: var(--ops-line); --color-ops-ink: var(--ops-ink); --color-ops-muted: var(--ops-muted);
-  --color-carbon: var(--ops-deep); --color-panel: var(--ops-navy); --color-panel2: var(--ops-panel); --color-line: var(--ops-line); --color-ink: var(--ops-ink); --color-muted-ink: var(--ops-muted); --color-faint: var(--faint); --color-cool: var(--brand-sky);
-  --color-sla-green: var(--sla-green); --color-sla-amber: var(--sla-amber); --color-sla-red: var(--sla-red);
-  --color-background: var(--background); --color-foreground: var(--foreground); --color-card: var(--card); --color-card-foreground: var(--card-foreground); --color-popover: var(--popover); --color-popover-foreground: var(--popover-foreground); --color-primary: var(--primary); --color-primary-foreground: var(--primary-foreground); --color-secondary: var(--secondary); --color-secondary-foreground: var(--secondary-foreground); --color-muted: var(--muted); --color-muted-foreground: var(--muted-foreground); --color-accent: var(--accent); --color-accent-foreground: var(--accent-foreground); --color-destructive: var(--destructive); --color-destructive-foreground: var(--destructive-foreground); --color-border: var(--border); --color-input: var(--input); --color-ring: var(--ring); --color-ring-offset-background: var(--background);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Sora", ui-sans-serif, sans-serif;
+  --font-data: "DM Mono", ui-monospace, monospace;
+  --color-brand-navy: var(--brand-navy);
+  --color-brand-blue: var(--brand-blue);
+  --color-brand-sky: var(--brand-sky);
+  --color-brand-mist: var(--brand-mist);
+  --color-surface: var(--surface);
+  --color-ops-deep: var(--ops-deep);
+  --color-ops-navy: var(--ops-navy);
+  --color-ops-panel: var(--ops-panel);
+  --color-ops-line: var(--ops-line);
+  --color-ops-ink: var(--ops-ink);
+  --color-ops-muted: var(--ops-muted);
+  --color-carbon: var(--ops-deep);
+  --color-panel: var(--ops-navy);
+  --color-panel2: var(--ops-panel);
+  --color-line: var(--ops-line);
+  --color-ink: var(--ops-ink);
+  --color-muted-ink: var(--ops-muted);
+  --color-faint: var(--faint);
+  --color-cool: var(--brand-sky);
+  --color-sla-green: var(--sla-green);
+  --color-sla-amber: var(--sla-amber);
+  --color-sla-red: var(--sla-red);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ring-offset-background: var(--background);
   --shadow-brand: 0 18px 45px -18px color-mix(in oklab, var(--brand-blue) 45%, transparent);
 }
 
 :root {
-  --radius: .625rem;
-  --brand-navy: oklch(0.245 0.113 267); --brand-blue: oklch(0.415 0.166 261); --brand-sky: oklch(0.692 0.105 235); --brand-mist: oklch(0.975 0.012 228); --surface: oklch(1 0 0);
-  --ops-deep: oklch(0.145 0.047 265); --ops-navy: oklch(0.19 0.055 265); --ops-panel: oklch(0.235 0.058 263); --ops-line: oklch(0.315 0.055 260); --ops-ink: oklch(0.96 0.012 235); --ops-muted: oklch(0.69 0.034 245); --faint: oklch(0.52 0.035 250);
-  --sla-green: oklch(0.72 0.15 158); --sla-amber: oklch(0.78 0.15 75); --sla-red: oklch(0.64 0.21 25);
-  --background: var(--brand-mist); --foreground: var(--brand-navy); --card: var(--surface); --card-foreground: var(--brand-navy); --popover: var(--surface); --popover-foreground: var(--brand-navy); --primary: var(--brand-blue); --primary-foreground: var(--surface); --secondary: oklch(0.94 0.025 238); --secondary-foreground: var(--brand-navy); --muted: oklch(0.94 0.018 240); --muted-foreground: oklch(0.51 0.045 255); --accent: oklch(0.91 0.04 235); --accent-foreground: var(--brand-navy); --destructive: var(--sla-red); --destructive-foreground: var(--surface); --border: oklch(0.87 0.025 240); --input: oklch(0.84 0.035 240); --ring: var(--brand-sky);
+  --radius: 0.625rem;
+  --brand-navy: oklch(0.245 0.113 267);
+  --brand-blue: oklch(0.415 0.166 261);
+  --brand-sky: oklch(0.692 0.105 235);
+  --brand-mist: oklch(0.975 0.012 228);
+  --surface: oklch(1 0 0);
+  --ops-deep: oklch(0.145 0.047 265);
+  --ops-navy: oklch(0.19 0.055 265);
+  --ops-panel: oklch(0.235 0.058 263);
+  --ops-line: oklch(0.315 0.055 260);
+  --ops-ink: oklch(0.96 0.012 235);
+  --ops-muted: oklch(0.69 0.034 245);
+  --faint: oklch(0.52 0.035 250);
+  --sla-green: oklch(0.72 0.15 158);
+  --sla-amber: oklch(0.78 0.15 75);
+  --sla-red: oklch(0.64 0.21 25);
+  --background: var(--brand-mist);
+  --foreground: var(--brand-navy);
+  --card: var(--surface);
+  --card-foreground: var(--brand-navy);
+  --popover: var(--surface);
+  --popover-foreground: var(--brand-navy);
+  --primary: var(--brand-blue);
+  --primary-foreground: var(--surface);
+  --secondary: oklch(0.94 0.025 238);
+  --secondary-foreground: var(--brand-navy);
+  --muted: oklch(0.94 0.018 240);
+  --muted-foreground: oklch(0.51 0.045 255);
+  --accent: oklch(0.91 0.04 235);
+  --accent-foreground: var(--brand-navy);
+  --destructive: var(--sla-red);
+  --destructive-foreground: var(--surface);
+  --border: oklch(0.87 0.025 240);
+  --input: oklch(0.84 0.035 240);
+  --ring: var(--brand-sky);
 }
-@layer base { * { border-color: var(--color-border); } body { margin:0; background:var(--color-background); color:var(--color-foreground); font-family:var(--font-sans); -webkit-font-smoothing:antialiased; } button,a { -webkit-tap-highlight-color:transparent; } }
-@keyframes slaPulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.45;transform:scale(.85)} }
-@utility pulse-sla { animation:slaPulse 1.7s ease-in-out infinite; }
-@media (prefers-reduced-motion: reduce) { .pulse-sla { animation:none; } }
+
+/* El centro opera en azul oscuro por defecto. El modo día usa superficies
+   claras y texto carbón para reducir el esfuerzo visual durante turnos largos. */
+html.theme-light {
+  --ops-deep: oklch(0.97 0.012 240);
+  --ops-navy: oklch(0.995 0.004 240);
+  --ops-panel: oklch(0.935 0.018 238);
+  --ops-line: oklch(0.83 0.035 240);
+  --ops-ink: oklch(0.2 0.035 255);
+  --ops-muted: oklch(0.43 0.045 250);
+  --faint: oklch(0.52 0.04 250);
+}
+
+html.theme-dark {
+  --brand-navy: oklch(0.91 0.025 235);
+  --brand-blue: oklch(0.71 0.14 245);
+  --brand-sky: oklch(0.78 0.11 230);
+  --brand-mist: oklch(0.145 0.047 265);
+  --surface: oklch(0.19 0.055 265);
+  --background: var(--ops-deep);
+  --foreground: var(--ops-ink);
+  --card: var(--ops-navy);
+  --card-foreground: var(--ops-ink);
+  --popover: var(--ops-navy);
+  --popover-foreground: var(--ops-ink);
+  --primary: var(--brand-blue);
+  --primary-foreground: oklch(0.15 0.03 260);
+  --secondary: var(--ops-panel);
+  --secondary-foreground: var(--ops-ink);
+  --muted: var(--ops-panel);
+  --muted-foreground: var(--ops-muted);
+  --accent: var(--ops-panel);
+  --accent-foreground: var(--ops-ink);
+  --border: var(--ops-line);
+  --input: var(--ops-line);
+  --ring: var(--brand-sky);
+}
+
+/* Evita que etiquetas largas rompan tarjetas o tablas en pantallas estrechas. */
+button,
+a,
+p,
+h1,
+h2,
+h3,
+h4,
+td,
+th,
+label {
+  overflow-wrap: anywhere;
+}
+table {
+  min-width: 0;
+}
+input,
+textarea,
+select {
+  max-width: 100%;
+}
+/* Los textos auxiliares anteriores eran demasiado pequeños para operación diaria. */
+.text-\[9px\] {
+  font-size: 0.6875rem;
+  line-height: 1.35;
+}
+.text-\[10px\] {
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+.text-\[11px\] {
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  body {
+    margin: 0;
+    background: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  button,
+  a {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+@keyframes slaPulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.45;
+    transform: scale(0.85);
+  }
+}
+@utility pulse-sla {
+  animation: slaPulse 1.7s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .pulse-sla {
+    animation: none;
+  }
+}
 
 /* Mapa interactivo (Leaflet) con el tema oscuro del centro de operaciones.
    Prefijo .leaflet-container para ganarle a leaflet.css, que carga después. */
-.leaflet-container { font-family: var(--font-sans); background: var(--ops-deep); }
-.leaflet-container .leaflet-popup-content-wrapper, .leaflet-container .leaflet-popup-tip { background: var(--ops-navy); color: var(--ops-ink); border: 1px solid var(--ops-line); box-shadow: 0 12px 30px rgb(0 0 0 / .45); }
-.leaflet-container .leaflet-popup-content { margin: 12px 14px; font-size: 12px; line-height: 1.4; }
-.leaflet-container a.leaflet-popup-close-button { color: var(--ops-muted); }
-.leaflet-container .leaflet-tooltip { background: var(--ops-deep); color: var(--ops-ink); border: 1px solid var(--ops-line); font-size: 10px; font-weight: 700; box-shadow: none; }
-.leaflet-container .leaflet-tooltip-top::before { border-top-color: var(--ops-line); }
-.leaflet-container .leaflet-control-attribution { background: color-mix(in oklab, var(--ops-deep) 80%, transparent); color: var(--ops-muted); font-size: 9px; }
-.leaflet-container .leaflet-control-attribution a { color: var(--brand-sky); }
+.leaflet-container {
+  font-family: var(--font-sans);
+  background: var(--ops-deep);
+}
+.leaflet-container .leaflet-popup-content-wrapper,
+.leaflet-container .leaflet-popup-tip {
+  background: var(--ops-navy);
+  color: var(--ops-ink);
+  border: 1px solid var(--ops-line);
+  box-shadow: 0 12px 30px rgb(0 0 0 / 0.45);
+}
+.leaflet-container .leaflet-popup-content {
+  margin: 12px 14px;
+  font-size: 12px;
+  line-height: 1.4;
+}
+.leaflet-container a.leaflet-popup-close-button {
+  color: var(--ops-muted);
+}
+.leaflet-container .leaflet-tooltip {
+  background: var(--ops-deep);
+  color: var(--ops-ink);
+  border: 1px solid var(--ops-line);
+  font-size: 10px;
+  font-weight: 700;
+  box-shadow: none;
+}
+.leaflet-container .leaflet-tooltip-top::before {
+  border-top-color: var(--ops-line);
+}
+.leaflet-container .leaflet-control-attribution {
+  background: color-mix(in oklab, var(--ops-deep) 80%, transparent);
+  color: var(--ops-muted);
+  font-size: 9px;
+}
+.leaflet-container .leaflet-control-attribution a {
+  color: var(--brand-sky);
+}

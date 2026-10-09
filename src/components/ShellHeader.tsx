@@ -22,6 +22,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { BotonGuia, RecorridoProvider } from "@/components/recorrido";
 import { horaColombia } from "@/lib/hora";
 import { Button } from "@/components/ui/button";
+import { TemaToggle } from "@/components/theme-toggle";
 import { casosQuery } from "@/lib/casos";
 import { FLOTA } from "@/lib/flota";
 import {
@@ -402,6 +403,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
             <Buscador />
             <BotonGuia />
+            <TemaToggle compact />
             <Button asChild size="sm" className="hidden rounded-lg font-bold sm:inline-flex">
               <Link to="/reportar">Nuevo incidente</Link>
             </Button>
