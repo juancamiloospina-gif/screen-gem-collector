@@ -7,6 +7,7 @@ import {
   Bell,
   Building2,
   Check,
+  CheckCheck,
   Clock3,
   FileText,
   Flag,
@@ -19,6 +20,7 @@ import {
   Star,
   Truck,
   UserRound,
+  Bot,
   PhoneCall,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -579,9 +581,41 @@ function DetalleCaso() {
 }
 
 function SeguimientoAtraso({ caso, onRefresh }: { caso: Caso; onRefresh: () => Promise<void> }) {
+  type Mensaje = { autor: string; texto: string; en: string; propio?: boolean };
+  const proveedorChat = caso.proveedor ?? "Mesa de asignaciones";
+  const [conversacionProveedor, setConversacionProveedor] = useState<Mensaje[]>(() => [
+    {
+      autor: "Operador",
+      texto: caso.proveedor
+        ? `Hola, tenemos novedades con el caso #${caso.numero}. ¿Nos confirman el estado del servicio?`
+        : `Solicito asignación de proveedor para el caso #${caso.numero}.`,
+      en: caso.creado_en,
+      propio: true,
+    },
+    {
+      autor: proveedorChat,
+      texto: caso.proveedor
+        ? "Recibido. Estoy validando con el equipo en campo y regreso con una hora estimada."
+        : "Recibido. Estamos validando disponibilidad en la zona para asignar el servicio.",
+      en: new Date(new Date(caso.creado_en).getTime() + 4 * 60_000).toISOString(),
+    },
+  ]);
+  const [conversacionSupervisor, setConversacionSupervisor] = useState<Mensaje[]>(() => [
+    {
+      autor: "Sistema",
+      texto: caso.motivo_traspaso ?? "Caso crítico enviado a supervisión.",
+      en: caso.creado_en,
+    },
+    {
+      autor: caso.responsable ?? "Supervisor",
+      texto: "Recibido. Tomo el seguimiento y mantengo informado al equipo.",
+      en: new Date(new Date(caso.creado_en).getTime() + 6 * 60_000).toISOString(),
+    },
+  ]);
   const [razon, setRazon] = useState(caso.razon_atraso ?? "");
   const [compromiso, setCompromiso] = useState("");
-  const [mensaje, setMensaje] = useState("");
+  const [mensajeProveedor, setMensajeProveedor] = useState("");
+  const [mensajeSupervisor, setMensajeSupervisor] = useState("");
   const [canal, setCanal] = useState<CanalContacto>("Llamada");
   const [guardando, setGuardando] = useState(false);
 
@@ -594,6 +628,16 @@ function SeguimientoAtraso({ caso, onRefresh }: { caso: Caso; onRefresh: () => P
         compromiso: compromiso.trim(),
         canal,
       });
+      const ahora = new Date().toISOString();
+      setConversacionProveedor((actual) => [
+        ...actual,
+        { autor: "Operador", texto: compromiso.trim(), en: ahora, propio: true },
+        {
+          autor: proveedorChat,
+          texto: `Entendido. La razón reportada es: ${razon.trim()}. Dejamos como compromiso: ${compromiso.trim()}.`,
+          en: new Date(Date.now() + 60_000).toISOString(),
+        },
+      ]);
       setCompromiso("");
       await onRefresh();
     } finally {
@@ -602,15 +646,25 @@ function SeguimientoAtraso({ caso, onRefresh }: { caso: Caso; onRefresh: () => P
   }
 
   async function enviarMensaje() {
-    if (!mensaje.trim()) return;
+    if (!mensajeSupervisor.trim()) return;
     setGuardando(true);
     try {
       await registrarNovedad(
         caso.id,
-        mensaje.trim(),
+        mensajeSupervisor.trim(),
         caso.responsable ? `Responsable · ${caso.responsable}` : "Supervisor · Laura Díaz",
       );
-      setMensaje("");
+      const ahora = new Date().toISOString();
+      setConversacionSupervisor((actual) => [
+        ...actual,
+        { autor: "Operador", texto: mensajeSupervisor.trim(), en: ahora, propio: true },
+        {
+          autor: caso.responsable ?? "Supervisor",
+          texto: "Recibido. Lo reviso y te confirmo la siguiente acción.",
+          en: new Date(Date.now() + 45_000).toISOString(),
+        },
+      ]);
+      setMensajeSupervisor("");
       await onRefresh();
     } finally {
       setGuardando(false);
@@ -644,20 +698,43 @@ function SeguimientoAtraso({ caso, onRefresh }: { caso: Caso; onRefresh: () => P
       </div>
 
       <div className="grid gap-5 p-5 lg:grid-cols-2">
-        <div>
-          <div className="flex items-center gap-2 text-xs font-bold">
-            <PhoneCall className="size-4 text-brand-sky" /> Contacto directo con el proveedor
+        <div className="rounded-xl border border-brand-blue/30 bg-ops-deep/50 p-4">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-xs font-bold">
+              <PhoneCall className="size-4 text-brand-sky" /> Contacto directo con el proveedor
+            </div>
+            <span className="rounded-full bg-brand-blue/20 px-2 py-1 text-[9px] font-bold uppercase tracking-wide text-brand-sky">
+              Simulación
+            </span>
           </div>
           <p className="mt-2 text-[11px] text-ops-muted">
             {caso.proveedor
               ? `Proveedor asignado: ${caso.proveedor}`
-              : "Proveedor pendiente de asignación. No se puede iniciar el contacto todavía."}
+              : "Proveedor pendiente de asignación · contacto simulado con mesa de asignaciones"}
           </p>
+          <div className="mt-3 max-h-52 space-y-2 overflow-y-auto rounded-lg border border-ops-line bg-ops-deep p-3">
+            {conversacionProveedor.map((m, i) => (
+              <div
+                key={`${m.en}-${i}`}
+                className={`flex gap-2 ${m.propio ? "justify-end" : "justify-start"}`}
+              >
+                {!m.propio && <Bot className="mt-1 size-3.5 shrink-0 text-brand-sky" />}
+                <div
+                  className={`max-w-[85%] rounded-lg px-3 py-2 text-[11px] ${m.propio ? "bg-brand-blue/25 text-ops-ink" : "bg-ops-panel text-ops-ink"}`}
+                >
+                  <div className="mb-1 flex items-center justify-between gap-3 text-[9px] font-bold text-brand-sky">
+                    <span>{m.autor}</span>
+                    <span className="font-data text-ops-muted">{formatoReloj(m.en)}</span>
+                  </div>
+                  {m.texto}
+                </div>
+              </div>
+            ))}
+          </div>
           <div className="mt-3 space-y-3">
             <select
               value={canal}
               onChange={(e) => setCanal(e.target.value as CanalContacto)}
-              disabled={!caso.proveedor}
               aria-label="Canal de contacto con el proveedor"
               className="h-10 w-full rounded-lg border border-ops-line bg-ops-deep px-3 text-xs text-ops-ink outline-none focus:border-brand-sky disabled:cursor-not-allowed disabled:opacity-50"
             >
@@ -670,49 +747,99 @@ function SeguimientoAtraso({ caso, onRefresh }: { caso: Caso; onRefresh: () => P
             <input
               value={razon}
               onChange={(e) => setRazon(e.target.value)}
-              disabled={!caso.proveedor}
               placeholder="Razón del atraso (ej. proveedor atendía otro servicio)"
               className="h-10 w-full rounded-lg border border-ops-line bg-ops-deep px-3 text-xs text-ops-ink outline-none placeholder:text-ops-muted focus:border-brand-sky"
             />
             <textarea
               value={compromiso}
               onChange={(e) => setCompromiso(e.target.value)}
-              disabled={!caso.proveedor}
               placeholder="Compromiso y próxima acción (ej. llega en 20 minutos)"
               className="min-h-20 w-full rounded-lg border border-ops-line bg-ops-deep p-3 text-xs text-ops-ink outline-none placeholder:text-ops-muted focus:border-brand-sky"
             />
             <Button
               type="button"
               size="sm"
-              disabled={guardando || !caso.proveedor || !razon.trim() || !compromiso.trim()}
+              disabled={guardando || !razon.trim() || !compromiso.trim()}
               onClick={registrarContacto}
               className="rounded-lg font-bold"
             >
-              Registrar contacto
+              Registrar contacto y respuesta
+            </Button>
+          </div>
+          <div className="mt-3 flex gap-2">
+            <input
+              value={mensajeProveedor}
+              onChange={(e) => setMensajeProveedor(e.target.value)}
+              placeholder="Escribe un mensaje al proveedor…"
+              className="h-9 flex-1 rounded-lg border border-ops-line bg-ops-deep px-3 text-[11px] text-ops-ink outline-none placeholder:text-ops-muted focus:border-brand-sky"
+            />
+            <Button
+              type="button"
+              size="icon"
+              disabled={guardando || !mensajeProveedor.trim()}
+              onClick={() => {
+                const texto = mensajeProveedor.trim();
+                setConversacionProveedor((actual) => [
+                  ...actual,
+                  { autor: "Operador", texto, en: new Date().toISOString(), propio: true },
+                ]);
+                setMensajeProveedor("");
+              }}
+              aria-label="Enviar mensaje al proveedor"
+              className="size-9 rounded-lg"
+            >
+              <Send className="size-3.5" />
             </Button>
           </div>
         </div>
 
-        <div>
-          <div className="flex items-center gap-2 text-xs font-bold">
-            <MessageSquare className="size-4 text-brand-sky" /> Chat directo con el supervisor
+        <div className="rounded-xl border border-sla-amber/30 bg-ops-deep/50 p-4">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-xs font-bold">
+              <MessageSquare className="size-4 text-sla-amber" /> Chat directo con el supervisor
+            </div>
+            <span className="rounded-full bg-sla-amber/15 px-2 py-1 text-[9px] font-bold uppercase tracking-wide text-sla-amber">
+              Supervisor
+            </span>
           </div>
           <p className="mt-2 text-[11px] text-ops-muted">
-            Destinatario: <span className="font-bold text-brand-sky">{caso.responsable ?? "Supervisor pendiente"}</span>
+            Destinatario:{" "}
+            <span className="font-bold text-brand-sky">
+              {caso.responsable ?? "Supervisor pendiente"}
+            </span>
           </p>
+          <div className="mt-3 max-h-52 space-y-2 overflow-y-auto rounded-lg border border-ops-line bg-ops-deep p-3">
+            {conversacionSupervisor.map((m, i) => (
+              <div
+                key={`${m.en}-${i}`}
+                className={`flex gap-2 ${m.propio ? "justify-end" : "justify-start"}`}
+              >
+                {!m.propio && <MessageSquare className="mt-1 size-3.5 shrink-0 text-sla-amber" />}
+                <div
+                  className={`max-w-[85%] rounded-lg px-3 py-2 text-[11px] ${m.propio ? "bg-brand-blue/25 text-ops-ink" : "bg-ops-panel text-ops-ink"}`}
+                >
+                  <div className="mb-1 flex items-center justify-between gap-3 text-[9px] font-bold text-sla-amber">
+                    <span>{m.autor}</span>
+                    <span className="font-data text-ops-muted">{formatoReloj(m.en)}</span>
+                  </div>
+                  {m.texto}
+                </div>
+              </div>
+            ))}
+          </div>
           <div className="mt-3 flex gap-2">
             <textarea
-              value={mensaje}
-              onChange={(e) => setMensaje(e.target.value)}
+              value={mensajeSupervisor}
+              onChange={(e) => setMensajeSupervisor(e.target.value)}
               placeholder="Escribe la actualización para el responsable…"
               className="min-h-20 flex-1 rounded-lg border border-ops-line bg-ops-deep p-3 text-xs text-ops-ink outline-none placeholder:text-ops-muted focus:border-brand-sky"
             />
             <Button
               type="button"
               size="icon"
-              disabled={guardando || !mensaje.trim()}
+              disabled={guardando || !mensajeSupervisor.trim()}
               onClick={enviarMensaje}
-              aria-label="Enviar actualización"
+              aria-label="Enviar mensaje al supervisor"
               className="mt-auto shrink-0 rounded-lg"
             >
               <Send className="size-4" />
@@ -738,6 +865,10 @@ function SeguimientoAtraso({ caso, onRefresh }: { caso: Caso; onRefresh: () => P
               )}
             </select>
           </div>
+          <div className="mt-3 flex items-center gap-1 text-[10px] text-ops-muted">
+            <CheckCheck className="size-3.5 text-sla-green" /> Las respuestas son simuladas para la
+            demo.
+          </div>
         </div>
       </div>
 
@@ -747,18 +878,23 @@ function SeguimientoAtraso({ caso, onRefresh }: { caso: Caso; onRefresh: () => P
             Últimos contactos
           </p>
           <ul className="mt-3 grid gap-2 text-[11px] sm:grid-cols-2">
-            {[...caso.contactos_proveedor].reverse().slice(0, 4).map((contacto, i) => (
-              <li key={`${contacto.en}-${i}`} className="rounded-lg bg-ops-deep p-3">
-                <div className="flex items-center justify-between gap-3">
-                  <span className="font-bold">{contacto.canal} · {contacto.proveedor}</span>
-                  <span className="font-data text-[10px] text-ops-muted">
-                    {formatoReloj(contacto.en)}
-                  </span>
-                </div>
-                <p className="mt-1 text-ops-muted">{contacto.razon_atraso}</p>
-                <p className="mt-1">Compromiso: {contacto.compromiso}</p>
-              </li>
-            ))}
+            {[...caso.contactos_proveedor]
+              .reverse()
+              .slice(0, 4)
+              .map((contacto, i) => (
+                <li key={`${contacto.en}-${i}`} className="rounded-lg bg-ops-deep p-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="font-bold">
+                      {contacto.canal} · {contacto.proveedor}
+                    </span>
+                    <span className="font-data text-[10px] text-ops-muted">
+                      {formatoReloj(contacto.en)}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-ops-muted">{contacto.razon_atraso}</p>
+                  <p className="mt-1">Compromiso: {contacto.compromiso}</p>
+                </li>
+              ))}
           </ul>
         </div>
       )}

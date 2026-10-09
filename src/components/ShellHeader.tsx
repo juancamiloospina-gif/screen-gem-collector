@@ -24,44 +24,80 @@ import { horaColombia } from "@/lib/hora";
 import { Button } from "@/components/ui/button";
 import { casosQuery } from "@/lib/casos";
 import { FLOTA } from "@/lib/flota";
+import {
+  guardarPerfil,
+  leerPerfil,
+  PERFILES,
+  tienePermiso,
+  type Perfil,
+  type Permiso,
+} from "@/lib/perfiles";
 
 const SECCIONES = [
   {
     titulo: "Operación",
     items: [
-      { to: "/centro", label: "Centro operativo", icon: LayoutDashboard },
-      { to: "/alertas", label: "Alertas", icon: Siren },
-      { to: "/reportar", label: "Reportar incidente", icon: MessageSquareText },
+      {
+        to: "/centro",
+        label: "Centro operativo",
+        icon: LayoutDashboard,
+        permiso: "gestionar_casos",
+      },
+      { to: "/alertas", label: "Alertas", icon: Siren, permiso: "gestionar_casos" },
+      {
+        to: "/reportar",
+        label: "Reportar incidente",
+        icon: MessageSquareText,
+        permiso: "gestionar_casos",
+      },
     ],
   },
   {
     titulo: "Procesos críticos",
     items: [
-      { to: "/front", label: "Front · Toma", icon: Inbox },
-      { to: "/back", label: "Back · Asignación", icon: ClipboardList },
-      { to: "/seguimiento", label: "Seguimiento", icon: RouteIcon },
+      { to: "/front", label: "Front · Toma", icon: Inbox, permiso: "gestionar_casos" },
+      { to: "/back", label: "Back · Asignación", icon: ClipboardList, permiso: "gestionar_casos" },
+      { to: "/seguimiento", label: "Seguimiento", icon: RouteIcon, permiso: "gestionar_casos" },
     ],
   },
   {
     titulo: "Control",
     items: [
-      { to: "/supervision", label: "Supervisión", icon: Headset },
-      { to: "/coberturas", label: "Coberturas y excedentes", icon: ShieldCheck },
-      { to: "/flota", label: "Base de flota", icon: Truck },
+      { to: "/supervision", label: "Supervisión", icon: Headset, permiso: "supervisar" },
+      {
+        to: "/coberturas",
+        label: "Coberturas y excedentes",
+        icon: ShieldCheck,
+        permiso: "supervisar",
+      },
+      { to: "/flota", label: "Base de flota", icon: Truck, permiso: "ver_todo" },
     ],
   },
   {
     titulo: "Análisis",
     items: [
-      { to: "/analitica", label: "Analítica de flota", icon: Activity },
-      { to: "/informes", label: "Indicadores e informes", icon: FileText },
-      { to: "/antes-despues", label: "Impacto", icon: ChartNoAxesCombined },
+      { to: "/analitica", label: "Analítica de flota", icon: Activity, permiso: "ver_informes" },
+      { to: "/informes", label: "Indicadores e informes", icon: FileText, permiso: "ver_informes" },
+      {
+        to: "/antes-despues",
+        label: "Impacto",
+        icon: ChartNoAxesCombined,
+        permiso: "ver_informes",
+      },
     ],
   },
 ] as const;
 
 // Enlaces agrupados; se usa en el menú lateral y en el menú móvil.
-function EnlacesNav({ onElegir, denso = false }: { onElegir?: () => void; denso?: boolean }) {
+function EnlacesNav({
+  onElegir,
+  denso = false,
+  perfil,
+}: {
+  onElegir?: () => void;
+  denso?: boolean;
+  perfil: Perfil;
+}) {
   return (
     <>
       {SECCIONES.map((sec) => (
@@ -69,25 +105,70 @@ function EnlacesNav({ onElegir, denso = false }: { onElegir?: () => void; denso?
           <p className="px-3 pb-1 text-[9px] font-bold uppercase tracking-[0.16em] text-faint">
             {sec.titulo}
           </p>
-          {sec.items.map(({ to, label, icon: Icon }) => (
-            <Link
-              key={to}
-              to={to}
-              onClick={onElegir}
-              activeOptions={{ exact: to === "/centro" }}
-              className={`flex items-center gap-3 rounded-lg px-3 ${denso ? "py-2" : "py-2.5"} text-sm font-semibold text-ops-muted transition-colors hover:bg-ops-panel hover:text-ops-ink`}
-              activeProps={{
-                className: "bg-brand-blue/20 text-brand-sky ring-1 ring-brand-blue/30",
-              }}
-            >
-              <Icon className="size-5" />
-              {label}
-            </Link>
-          ))}
+          {sec.items
+            .filter((item) => !item.permiso || tienePermiso(perfil, item.permiso as Permiso))
+            .map(({ to, label, icon: Icon }) => (
+              <Link
+                key={to}
+                to={to}
+                onClick={onElegir}
+                activeOptions={{ exact: to === "/centro" }}
+                className={`flex items-center gap-3 rounded-lg px-3 ${denso ? "py-2" : "py-2.5"} text-sm font-semibold text-ops-muted transition-colors hover:bg-ops-panel hover:text-ops-ink`}
+                activeProps={{
+                  className: "bg-brand-blue/20 text-brand-sky ring-1 ring-brand-blue/30",
+                }}
+              >
+                <Icon className="size-5" />
+                {label}
+              </Link>
+            ))}
         </div>
       ))}
     </>
   );
+}
+
+function SelectorPerfil({
+  perfil,
+  onChange,
+}: {
+  perfil: Perfil;
+  onChange: (perfil: Perfil) => void;
+}) {
+  return (
+    <label className="block text-[10px] text-ops-muted">
+      Perfil activo
+      <select
+        value={perfil}
+        onChange={(e) => onChange(e.target.value as Perfil)}
+        className="mt-1 h-9 w-full rounded-lg border border-ops-line bg-ops-deep px-2 text-xs font-bold text-ops-ink outline-none focus:border-brand-sky"
+      >
+        {(Object.keys(PERFILES) as Perfil[]).map((key) => (
+          <option key={key} value={key}>
+            {PERFILES[key].nombre}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+function usePerfilActivo(): [Perfil, (perfil: Perfil) => void] {
+  const [perfil, setPerfil] = useState<Perfil>("director");
+  useEffect(() => {
+    setPerfil(leerPerfil());
+    const actualizar = (evento: Event) => {
+      const valor = (evento as CustomEvent<Perfil>).detail;
+      if (valor) setPerfil(valor);
+    };
+    window.addEventListener("assisprex-perfil-change", actualizar);
+    return () => window.removeEventListener("assisprex-perfil-change", actualizar);
+  }, []);
+  const cambiar = (nuevo: Perfil) => {
+    setPerfil(nuevo);
+    guardarPerfil(nuevo);
+  };
+  return [perfil, cambiar];
 }
 
 // Buscador del encabezado: casos activos por placa o número, y vehículos
@@ -227,6 +308,7 @@ function Reloj() {
 }
 function MobileMenu() {
   const [open, setOpen] = useState(false);
+  const [perfil, setPerfil] = usePerfilActivo();
   return (
     <>
       <Button
@@ -252,7 +334,7 @@ function MobileMenu() {
               <Marca />
             </div>
             <nav className="max-h-[calc(100vh-11rem)] overflow-y-auto p-3">
-              <EnlacesNav denso onElegir={() => setOpen(false)} />
+              <EnlacesNav denso perfil={perfil} onElegir={() => setOpen(false)} />
             </nav>
             <div className="absolute inset-x-4 bottom-4">
               <Link
@@ -271,6 +353,7 @@ function MobileMenu() {
 }
 export function AppShell({ children }: { children: ReactNode }) {
   const path = useRouterState({ select: (s) => s.location.pathname });
+  const [perfil, setPerfil] = usePerfilActivo();
   if (path === "/") return children;
   return (
     <RecorridoProvider>
@@ -283,17 +366,20 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Marca />
           </div>
           <nav className="flex-1 overflow-y-auto px-3">
-            <EnlacesNav denso />
+            <EnlacesNav denso perfil={perfil} />
           </nav>
           <div className="m-4 rounded-lg border border-ops-line bg-ops-panel/60 p-3">
             <div className="flex items-center gap-3">
               <div className="grid size-9 place-items-center rounded-lg bg-brand-blue font-display text-xs font-bold">
-                DF
+                {PERFILES[perfil].iniciales}
               </div>
               <div>
-                <p className="text-xs font-bold">Director de Flota</p>
+                <p className="text-xs font-bold">{PERFILES[perfil].nombre}</p>
                 <p className="text-[10px] text-ops-muted">Sesión de demostración</p>
               </div>
+            </div>
+            <div className="mt-3 border-t border-ops-line pt-3">
+              <SelectorPerfil perfil={perfil} onChange={setPerfil} />
             </div>
             <Link
               to="/"
